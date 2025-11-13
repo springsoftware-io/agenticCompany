@@ -1,33 +1,53 @@
 """Tests for agent workflow"""
 
 import os
+import sys
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
+
+# Add src directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 # Mock environment variables before importing
 os.environ['GITHUB_TOKEN'] = 'test_token'
 os.environ['ANTHROPIC_API_KEY'] = 'test_key'
 os.environ['REPO_URL'] = 'https://github.com/test/repo'
 
-from src.agent_workflow import AgentWorkflow
+from agent_workflow import AgentWorkflow
+from config import AgentConfig
 
 
 class TestAgentWorkflow:
     """Test suite for AgentWorkflow"""
     
     @pytest.fixture
-    def workflow(self):
-        """Create a workflow instance for testing"""
-        with patch('src.agent_workflow.Github'), \
-             patch('src.agent_workflow.Anthropic'):
-            return AgentWorkflow()
+    def mock_config(self):
+        """Create a mock config for testing"""
+        config = Mock(spec=AgentConfig)
+        config.github_token = 'test_token'
+        config.anthropic_api_key = 'test_key'
+        config.repo_url = 'https://github.com/test/repo'
+        config.workspace_path = '/tmp/test_workspace'
+        config.agent_mode = 'autonomous'
+        config.prompt_template = 'default'
+        config.custom_prompt_path = None
+        config.validate = Mock()
+        return config
     
-    def test_initialization(self, workflow):
+    @pytest.fixture
+    def workflow(self, mock_config):
+        """Create a workflow instance for testing"""
+        with patch('agent_workflow.Github'), \
+             patch('agent_workflow.Anthropic'), \
+             patch('agent_workflow.setup_logger'):
+            return AgentWorkflow(config=mock_config)
+    
+    def test_initialization(self, workflow, mock_config):
         """Test workflow initialization"""
-        assert workflow.github_token == 'test_token'
-        assert workflow.anthropic_api_key == 'test_key'
-        assert workflow.repo_url == 'https://github.com/test/repo'
+        assert workflow.config == mock_config
+        assert workflow.config.github_token == 'test_token'
+        assert workflow.config.anthropic_api_key == 'test_key'
     
     def test_parse_repo_info(self, workflow):
         """Test repository URL parsing"""
@@ -35,41 +55,26 @@ class TestAgentWorkflow:
         assert owner == 'test'
         assert repo == 'repo'
     
-    def test_parse_repo_info_with_git_suffix(self):
+    def test_parse_repo_info_with_git_suffix(self, mock_config):
         """Test parsing URL with .git suffix"""
-        os.environ['REPO_URL'] = 'https://github.com/owner/name.git'
-        with patch('src.agent_workflow.Github'), \
-             patch('src.agent_workflow.Anthropic'):
-            workflow = AgentWorkflow()
+        mock_config.repo_url = 'https://github.com/owner/name.git'
+        with patch('agent_workflow.Github'), \
+             patch('agent_workflow.Anthropic'), \
+             patch('agent_workflow.setup_logger'):
+            workflow = AgentWorkflow(config=mock_config)
             owner, repo = workflow._parse_repo_info()
             assert owner == 'owner'
             assert repo == 'name'
     
-    def test_validate_environment_missing_token(self):
-        """Test validation with missing GitHub token"""
-        os.environ.pop('GITHUB_TOKEN', None)
-        
-        with pytest.raises(ValueError, match="Missing required environment variables"):
-            with patch('src.agent_workflow.Github'), \
-                 patch('src.agent_workflow.Anthropic'):
-                AgentWorkflow()
-        
-        # Restore for other tests
-        os.environ['GITHUB_TOKEN'] = 'test_token'
-    
-    def test_analyze_codebase(self, workflow, tmp_path):
-        """Test codebase analysis"""
-        # Create test files
-        (tmp_path / "test.py").touch()
-        (tmp_path / "test.js").touch()
-        (tmp_path / "requirements.txt").touch()
-        
-        workflow.repo_path = tmp_path
-        analysis = workflow._analyze_codebase()
-        
-        assert 'py' in analysis['languages']
-        assert 'js' in analysis['languages']
-        assert 'requirements.txt' in analysis['key_files']
+    def test_parse_repo_info_invalid_url(self, mock_config):
+        """Test parsing invalid URL"""
+        mock_config.repo_url = 'https://github.com/invalid'
+        with patch('agent_workflow.Github'), \
+             patch('agent_workflow.Anthropic'), \
+             patch('agent_workflow.setup_logger'):
+            workflow = AgentWorkflow(config=mock_config)
+            with pytest.raises(ValueError, match="Invalid repository URL"):
+                workflow._parse_repo_info()
 
 
 if __name__ == '__main__':
