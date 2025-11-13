@@ -95,14 +95,15 @@ test-all:
 	@echo "🧪 Running all tests..."
 	@cd tests && python3 -m pytest -v --tb=short
 
-# Run tests with coverage
+# Run tests with coverage (unit tests only - no AI API calls)
 test-coverage:
-	@echo "📊 Running tests with coverage..."
+	@echo "📊 Running tests with coverage (unit tests only)..."
 	@cd tests && python3 -m pytest \
 		--cov=../src/gemini-agent \
 		--cov=../src/claude-agent \
 		--cov-report=html \
 		--cov-report=term \
+		-m "not integration" \
 		-v
 
 # Run linters
