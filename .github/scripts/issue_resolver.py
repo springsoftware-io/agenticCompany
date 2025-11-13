@@ -225,16 +225,19 @@ You have access to Read and Write tools to modify files in the current directory
     
     try:
         # Create Claude CLI Agent with permission to edit files
+        # Use verbose mode for better logging
         agent = ClaudeAgent(
             output_format="text",
-            verbose=True,
+            verbose=True,  # Enable verbose logging
             allowed_tools=["Read", "Write", "Bash"],
             permission_mode="acceptEdits"
         )
         
-        # Send the query to Claude
-        print("📤 Sending query to Claude...")
-        result = agent.query(prompt)
+        # Send the query to Claude with streaming output
+        print("📤 Sending query to Claude (streaming output)...")
+        print("-" * 60)
+        result = agent.query(prompt, stream_output=True)
+        print("-" * 60)
         
         # Extract the response
         if isinstance(result, dict) and "result" in result:
@@ -244,7 +247,8 @@ You have access to Read and Write tools to modify files in the current directory
         
         print(f"✅ Claude completed work")
         print(f"📊 Summary length: {len(summary)} chars")
-        print(f"📝 Response preview: {summary[:300]}...")
+        if len(summary) > 300:
+            print(f"📝 Response preview: {summary[:300]}...")
         
     except Exception as e:
         print(f"❌ Claude Agent error: {e}")

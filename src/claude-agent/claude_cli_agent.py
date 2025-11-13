@@ -107,7 +107,8 @@ class ClaudeAgent:
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
-        mcp_config: Optional[str] = None
+        mcp_config: Optional[str] = None,
+        stream_output: bool = False
     ) -> Dict[str, Any]:
         """
         Send a query to Claude in headless mode.
@@ -116,6 +117,7 @@ class ClaudeAgent:
             prompt: The prompt to send
             system_prompt: Additional system prompt
             mcp_config: Path to MCP configuration file
+            stream_output: If True, print output in real-time
             
         Returns:
             Dict containing response and metadata
@@ -131,17 +133,89 @@ class ClaudeAgent:
         cmd = self._build_command(prompt, additional_args)
         
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            
-            if self.output_format == "json":
-                return json.loads(result.stdout)
+            if stream_output:
+                # Stream output in real-time
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1
+                )
+                
+                stdout_lines = []
+                stderr_lines = []
+                
+                # Read stdout in real-time
+                for line in process.stdout:
+                    print(line, end='', flush=True)
+                    stdout_lines.append(line)
+                
+                # Wait for completion and get stderr
+                process.wait()
+                stderr_output = process.stderr.read()
+                
+                stdout_text = ''.join(stdout_lines)
+                
+                # Handle stderr - distinguish between warnings and errors
+                if stderr_output:
+                    stderr_lower = stderr_output.lower()
+                    is_warning_only = (
+                        "warn:" in stderr_lower or 
+                        "warning:" in stderr_lower
+                    ) and stdout_text.strip()  # Has actual output
+                    
+                    if is_warning_only:
+                        print(f"\n⚠️  Warning: {stderr_output.strip()}", flush=True)
+                    else:
+                        print(f"\n❌ Error: {stderr_output}", flush=True)
+                        stderr_lines.append(stderr_output)
+                
+                # Only raise error if returncode is non-zero AND it's not just a warning
+                if process.returncode != 0:
+                    stderr_lower = stderr_output.lower() if stderr_output else ""
+                    is_warning_only = (
+                        "warn:" in stderr_lower or 
+                        "warning:" in stderr_lower
+                    ) and stdout_text.strip()
+                    
+                    if not is_warning_only:
+                        raise RuntimeError(f"Claude CLI error: {stderr_output}")
+                
+                if self.output_format == "json":
+                    return json.loads(stdout_text)
+                else:
+                    return {"result": stdout_text}
             else:
-                return {"result": result.stdout}
+                # Capture all output at once
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False  # Don't raise on non-zero exit, we'll check manually
+                )
+                
+                # Check if there's actual output despite warnings in stderr
+                # Bun/AVX warnings shouldn't be treated as fatal errors
+                if result.returncode != 0:
+                    # Check if stderr contains only warnings (not actual errors)
+                    stderr_lower = result.stderr.lower() if result.stderr else ""
+                    is_warning_only = (
+                        "warn:" in stderr_lower or 
+                        "warning:" in stderr_lower
+                    ) and result.stdout.strip()  # Has actual output
+                    
+                    if not is_warning_only:
+                        raise RuntimeError(f"Claude CLI error: {result.stderr}")
+                    else:
+                        # Log warning but continue
+                        if self.verbose and result.stderr:
+                            print(f"⚠️  Warning from Claude CLI: {result.stderr.strip()}", flush=True)
+                
+                if self.output_format == "json":
+                    return json.loads(result.stdout)
+                else:
+                    return {"result": result.stdout}
                 
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Claude CLI error: {e.stderr}")
