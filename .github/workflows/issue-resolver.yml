@@ -60,7 +60,7 @@ jobs:
       
       - name: Run resolver
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REPO_NAME: ${{ github.repository }}
           SPECIFIC_ISSUE: ${{ github.event.inputs.issue_number }}
