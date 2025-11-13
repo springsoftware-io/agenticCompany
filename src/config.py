@@ -1,67 +1,62 @@
-"""Configuration management for Claude Agent"""
+"""Configuration management for Claude Agent using pydantic-settings"""
 
-import os
-from dataclasses import dataclass
+import sys
 from pathlib import Path
 from typing import Optional
 
-# Logging
-import sys
-from pathlib import Path
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from logging_config import get_logger
 
 logger = get_logger(__name__)
 
 
-
-@dataclass
-class AgentConfig:
-    """Agent configuration from environment variables"""
+class AgentConfig(BaseSettings):
+    """Agent configuration with environment variable support and validation
     
-    github_token: str
-    anthropic_api_key: str
-    repo_url: str
-    issue_number: Optional[int] = None
-    agent_mode: str = "auto"
-    workspace_path: str = "/workspace"
-    prompt_template: str = "default"
-    custom_prompt_path: Optional[str] = None
+    Supports multiple configuration sources with priority:
+    1. Environment variables (highest priority)
+    2. .env file
+    3. Default values (lowest priority)
+    """
     
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).parent.parent / '.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'
+    )
+    
+    # Required fields
+    github_token: str = Field(..., description="GitHub personal access token")
+    anthropic_api_key: str = Field(..., description="Anthropic API key for Claude")
+    repo_url: str = Field(..., description="Repository URL")
+    
+    # Optional fields with defaults
+    issue_number: Optional[int] = Field(None, description="Specific issue number to resolve")
+    agent_mode: str = Field("auto", description="Agent mode: auto, dry-run, or manual")
+    workspace_path: str = Field("/workspace", description="Workspace directory path")
+    prompt_template: str = Field("default", description="Prompt template name or path")
+    custom_prompt_path: Optional[str] = Field(None, description="Custom prompt file path")
+    
+    @field_validator('prompt_template', mode='before')
     @classmethod
-    def from_env(cls) -> "AgentConfig":
-        """Create configuration from environment variables"""
-        issue_num = os.getenv('ISSUE_NUMBER')
-        prompt_template = os.getenv('PROMPT_TEMPLATE', 'default')
-        
-        # Check if it's a file path or template name
-        custom_prompt_path = None
-        if prompt_template and (prompt_template.endswith('.txt') or '/' in prompt_template):
-            custom_prompt_path = prompt_template
-            prompt_template = 'custom'
-        
-        return cls(
-            github_token=os.getenv('GITHUB_TOKEN', ''),
-            anthropic_api_key=os.getenv('ANTHROPIC_API_KEY', ''),
-            repo_url=os.getenv('REPO_URL', ''),
-            issue_number=int(issue_num) if issue_num else None,
-            agent_mode=os.getenv('AGENT_MODE', 'auto'),
-            workspace_path=os.getenv('WORKSPACE_PATH', '/workspace'),
-            prompt_template=prompt_template,
-            custom_prompt_path=custom_prompt_path
-        )
+    def parse_prompt_template(cls, v):
+        """Parse prompt template and extract custom path if needed"""
+        if v and (v.endswith('.txt') or '/' in v):
+            return 'custom'
+        return v or 'default'
     
-    def validate(self) -> None:
-        """Validate required configuration"""
-        required = {
-            'github_token': self.github_token,
-            'anthropic_api_key': self.anthropic_api_key,
-            'repo_url': self.repo_url
-        }
-        
-        missing = [k for k, v in required.items() if not v]
-        if missing:
-            raise ValueError(f"Missing required configuration: {', '.join(missing)}")
+    @field_validator('agent_mode')
+    @classmethod
+    def validate_agent_mode(cls, v):
+        """Validate agent mode is one of allowed values"""
+        allowed = {'auto', 'dry-run', 'manual'}
+        if v not in allowed:
+            raise ValueError(f"agent_mode must be one of {allowed}, got: {v}")
+        return v
     
     @property
     def is_dry_run(self) -> bool:

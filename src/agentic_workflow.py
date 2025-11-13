@@ -25,9 +25,8 @@ class AgenticWorkflow:
     """Main workflow orchestrator for the Claude agentic system"""
     
     def __init__(self, config: Optional[AgentConfig] = None):
-        # Load configuration
-        self.config = config or AgentConfig.from_env()
-        self.config.validate()
+        # Load configuration - pydantic-settings handles validation automatically
+        self.config = config or AgentConfig()
         
         # Setup logging
         self.logger = setup_logger()
