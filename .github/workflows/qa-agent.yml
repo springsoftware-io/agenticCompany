@@ -1,0 +1,52 @@
+name: QA Agent
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'  # Every 20 minutes
+  workflow_dispatch:
+
+env:
+  MAX_ISSUES_TO_REVIEW: ${{ vars.MAX_ISSUES_TO_REVIEW || '10' }}
+  MAX_PRS_TO_REVIEW: ${{ vars.MAX_PRS_TO_REVIEW || '5' }}
+  MAX_COMMITS_TO_REVIEW: ${{ vars.MAX_COMMITS_TO_REVIEW || '10' }}
+
+jobs:
+  qa-check:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: qa-agent
+      cancel-in-progress: false
+    
+    permissions:
+      issues: write
+      contents: read
+      pull-requests: read
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50  # Get recent commits
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code || echo "Claude CLI not available, will use API fallback"
+      
+      - name: Install dependencies
+        run: pip install anthropic PyGithub GitPython
+      
+      - name: Run QA Agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REPO_NAME: ${{ github.repository }}
+        run: python .github/scripts/qa_agent.py
