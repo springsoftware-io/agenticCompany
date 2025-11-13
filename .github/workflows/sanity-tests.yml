@@ -1,0 +1,39 @@
+name: Sanity Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-claude-agent:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        working-directory: src/claude-agent
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+      
+      - name: Run tests
+        working-directory: src/claude-agent
+        run: |
+          echo "🧪 Running Claude Agent tests..."
+          python -m pytest tests/ -v --tb=short
+      
+      - name: Test summary
+        if: always()
+        run: |
+          echo "✅ Sanity tests completed"
