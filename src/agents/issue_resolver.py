@@ -422,6 +422,22 @@ I'm working on this issue now.
 
             return False, validation_msg
 
+    def _get_project_brief(self) -> str:
+        """Load PROJECT_BRIEF.md content if it exists"""
+        project_brief_path = Path("PROJECT_BRIEF.md")
+        
+        if not project_brief_path.exists():
+            return ""
+        
+        try:
+            with open(project_brief_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            # Limit to reasonable size to avoid token limits
+            return content[:5000]
+        except Exception as e:
+            logger.warning(f"Failed to read PROJECT_BRIEF.md: {e}")
+            return ""
+
     def _create_branch(self, branch_name: str, issue, issue_claimed: bool) -> bool:
         """Create a new git branch"""
         logger.info("-" * 80)
@@ -473,8 +489,16 @@ I'm working on this issue now.
             github_error = get_exception_for_github_error(e, "Failed to load README")
             logger.warning(f"Failed to load README: {github_error}")
 
+        project_brief = self._get_project_brief()
+        if not project_brief:
+            logger.warning("No PROJECT_BRIEF.md found")
+        else:
+            logger.info("Loaded PROJECT_BRIEF.md context")
+        
         # Build prompt for Claude CLI
-        cli_prompt = f"""You are an expert software engineer. Fix this GitHub issue by modifying the necessary files.
+        cli_prompt = f"""You are an expert software engineer. 
+Fix this GitHub issue by modifying the necessary files.
+Save your tokens and don't write documents unless asked. 
 
 Repository: {self.repo.full_name}
 Issue #{issue.number}: {issue.title}
@@ -487,14 +511,9 @@ Labels: {', '.join(issue_labels)}
 Context from README:
 {readme}
 
-Instructions:
-1. Analyze the issue carefully
-2. Use the Read tool to examine relevant files
-3. Use the Write tool to create or modify files with your fixes
-4. Make complete, working changes
-5. After making changes, summarize what you did
-
-You have access to Read and Write tools to modify files in the current directory."""
+Project Context:
+{project_brief}
+"""
 
         logger.debug(f"Prompt prepared ({len(cli_prompt)} chars)")
         logger.info(f"Issue type: {', '.join(issue_labels)}")
@@ -569,6 +588,9 @@ Labels: {', '.join(issue_labels)}
 
 Context from README:
 {readme}
+
+Project Context:
+{project_brief}
 
 Please provide:
 1. Analysis of the issue
