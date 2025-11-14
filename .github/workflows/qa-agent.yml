@@ -2,7 +2,7 @@ name: QA Agent
 
 on:
   schedule:
-    - cron: '*/20 */4 * * *'  # Every 20 minutes
+    - cron: '0 */4 * * *'  # Every 4 hours
   workflow_dispatch:
 
 env:
@@ -39,7 +39,9 @@ jobs:
           node-version: '20'
       
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code || echo "Claude CLI not available, will use API fallback"
+        run: |
+          npm install -g @anthropic-ai/claude-code || echo "Claude CLI not available, will use API fallback"
+        continue-on-error: true
       
       - name: Install dependencies
         run: pip install -r src/requirements.txt
@@ -49,4 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REPO_NAME: ${{ github.repository }}
-        run: python .github/scripts/qa_agent.py
+          PYTHONUNBUFFERED: '1'
+        run: |
+          echo "Running QA Agent for repository: $REPO_NAME"
+          python .github/scripts/qa_agent.py

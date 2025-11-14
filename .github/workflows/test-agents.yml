@@ -126,7 +126,21 @@ jobs:
           make install-test-deps
           make test-coverage
       
+      - name: Verify coverage file exists
+        run: |
+          if [ -f "./tests/htmlcov/coverage.xml" ]; then
+            echo "✅ Coverage XML file generated successfully"
+            ls -lh ./tests/htmlcov/coverage.xml
+          else
+            echo "⚠️ Coverage XML file not found"
+            echo "Contents of tests directory:"
+            ls -la ./tests/ || true
+            echo "Contents of tests/htmlcov directory:"
+            ls -la ./tests/htmlcov/ || true
+          fi
+      
       - name: Upload coverage to Codecov
+        if: hashFiles('./tests/htmlcov/coverage.xml') != ''
         uses: codecov/codecov-action@v4
         with:
           files: ./tests/htmlcov/coverage.xml
@@ -135,11 +149,13 @@ jobs:
           fail_ci_if_error: false
       
       - name: Upload coverage report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: tests/htmlcov/
           retention-days: 30
+          if-no-files-found: warn
 
   lint:
     name: Code Quality
