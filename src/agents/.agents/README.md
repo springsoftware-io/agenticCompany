@@ -15,8 +15,15 @@ src/agents/
 ├── issue_generator.py       # Core: Issue generation logic
 ├── issue_resolver.py        # Core: Issue resolution logic
 ├── qa_agent.py             # Core: QA monitoring logic
+├── base_issue_agent.py     # Core: Base class for specialized agents
+├── marketing_agent.py      # Core: Marketing-focused issue generation
+├── product_agent.py        # Core: Product-focused issue generation
+├── sales_agent.py          # Core: Sales-focused issue generation
 └── .agents/
-    └── README.md           # This file
+    ├── README.md           # This file
+    ├── SPECIALIZED_AGENTS.md  # Specialized agents documentation
+    ├── QUICK_START.md      # Quick start guide
+    └── ARCHITECTURE.md     # Architecture diagrams
 
 .github/scripts/
 ├── issue_generator.py      # Wrapper: Env setup + calls core module
@@ -30,9 +37,16 @@ src/agents/
 
 All agent implementations are classes with clear responsibilities:
 
+**General Agents:**
 - **`IssueGenerator`** - Generates GitHub issues using AI
 - **`IssueResolver`** - Resolves issues and creates PRs
 - **`QAAgent`** - Monitors repository health
+
+**Specialized Issue Agents:**
+- **`BaseIssueAgent`** - Abstract base class for domain-specific agents
+- **`MarketingAgent`** - Generates marketing and growth-related issues
+- **`ProductAgent`** - Generates product and feature-related issues
+- **`SalesAgent`** - Generates sales and revenue-related issues
 
 These classes are:
 - ✅ **Testable** - Can be unit tested independently
@@ -197,6 +211,9 @@ Core agents depend on:
 
 ## Related Documentation
 
+- [Specialized Agents Guide](./SPECIALIZED_AGENTS.md) - Complete guide to specialized agents
+- [Quick Start Guide](./QUICK_START.md) - Get started with specialized agents
+- [Architecture Diagrams](./ARCHITECTURE.md) - Visual architecture documentation
 - [GitHub Workflows](../../../.github/workflows/README.md)
 - [Project Brief Validator](../../utils/project_brief_validator.py)
 - [Claude Agent SDK](../../claude-agent/README.md)

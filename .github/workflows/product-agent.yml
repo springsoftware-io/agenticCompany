@@ -1,0 +1,30 @@
+name: Product Issue Agent
+
+on:
+  schedule:
+    # Example: run every day at 09:00 UTC
+    - cron: '0 9 * * *'
+
+  workflow_dispatch:
+    inputs:
+      dry_mode:
+        description: 'Run in dry mode (no issues created)'
+        required: false
+        default: false
+        type: boolean
+      min_issues:
+        description: 'Minimum product issues to maintain'
+        required: false
+        default: '2'
+        type: string
+
+jobs:
+  run-product-agent:
+    uses: ./.github/workflows/specialized-agents.yml
+    with:
+      agent: product
+      dry_mode: ${{ inputs.dry_mode || false }}
+      min_issues: ${{ inputs.min_issues || '2' }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -1,0 +1,30 @@
+name: Marketing Issue Agent
+
+on:
+  schedule:
+    # Example: run every day at 08:00 UTC
+    - cron: '0 8 * * *'
+
+  workflow_dispatch:
+    inputs:
+      dry_mode:
+        description: 'Run in dry mode (no issues created)'
+        required: false
+        default: false
+        type: boolean
+      min_issues:
+        description: 'Minimum marketing issues to maintain'
+        required: false
+        default: '2'
+        type: string
+
+jobs:
+  run-marketing-agent:
+    uses: ./.github/workflows/specialized-agents.yml
+    with:
+      agent: marketing
+      dry_mode: ${{ inputs.dry_mode || false }}
+      min_issues: ${{ inputs.min_issues || '2' }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

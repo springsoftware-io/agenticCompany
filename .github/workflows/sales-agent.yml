@@ -1,0 +1,30 @@
+name: Sales Issue Agent
+
+on:
+  schedule:
+    # Example: run every day at 10:00 UTC
+    - cron: '0 10 * * *'
+
+  workflow_dispatch:
+    inputs:
+      dry_mode:
+        description: 'Run in dry mode (no issues created)'
+        required: false
+        default: false
+        type: boolean
+      min_issues:
+        description: 'Minimum sales issues to maintain'
+        required: false
+        default: '2'
+        type: string
+
+jobs:
+  run-sales-agent:
+    uses: ./.github/workflows/specialized-agents.yml
+    with:
+      agent: sales
+      dry_mode: ${{ inputs.dry_mode || false }}
+      min_issues: ${{ inputs.min_issues || '2' }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
