@@ -26,6 +26,7 @@ permissions:
 jobs:
   run-product-agent:
     uses: ./.github/workflows/specialized-agents.yml
+    secrets: inherit
     with:
       agent: product
       dry_mode: ${{ inputs.dry_mode || false }}

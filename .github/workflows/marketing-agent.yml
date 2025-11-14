@@ -26,6 +26,7 @@ permissions:
 jobs:
   run-marketing-agent:
     uses: ./.github/workflows/specialized-agents.yml
+    secrets: inherit
     with:
       agent: marketing
       dry_mode: ${{ inputs.dry_mode || false }}

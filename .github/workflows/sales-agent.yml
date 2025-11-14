@@ -26,6 +26,7 @@ permissions:
 jobs:
   run-sales-agent:
     uses: ./.github/workflows/specialized-agents.yml
+    secrets: inherit
     with:
       agent: sales
       dry_mode: ${{ inputs.dry_mode || false }}
