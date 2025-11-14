@@ -6,20 +6,20 @@ name: Test AI Agents
       - main
       - develop
     paths:
-      - 'src/gemini-agent/**'
-      - 'src/claude-agent/**'
-      - 'tests/**'
-      - 'Makefile*'
+      - 'autogrow-core/src/gemini-agent/**'
+      - 'autogrow-core/src/claude-agent/**'
+      - 'autogrow-core/tests/**'
+      - 'autogrow-core/Makefile*'
       - '.github/workflows/test-agents.yml'
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'src/gemini-agent/**'
-      - 'src/claude-agent/**'
-      - 'tests/**'
-      - 'Makefile*'
+      - 'autogrow-core/src/gemini-agent/**'
+      - 'autogrow-core/src/claude-agent/**'
+      - 'autogrow-core/tests/**'
+      - 'autogrow-core/Makefile*'
   workflow_dispatch:
     inputs:
       run_integration_tests:
@@ -52,12 +52,12 @@ jobs:
           echo "OS: ${{ matrix.os }}"
           echo "Python: ${{ matrix.python-version }}"
           python --version
-          make show-os
+          cd autogrow-core && make show-os
       
       - name: Run CI flow
         run: |
-          # Run tests from project root, not from src directories
-          cd $GITHUB_WORKSPACE
+          # Run tests from autogrow-core directory
+          cd autogrow-core
           make ci-flow
       
       - name: Upload test results
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: tests/.pytest_cache/
+          path: autogrow-core/tests/.pytest_cache/
           retention-days: 7
 
   test-integration:
@@ -96,7 +96,9 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: make ci-integration-flow
+        run: |
+          cd autogrow-core
+          make ci-integration-flow
         continue-on-error: true
       
       - name: Upload integration test results
@@ -104,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-results-${{ matrix.os }}
-          path: tests/.pytest_cache/
+          path: autogrow-core/tests/.pytest_cache/
           retention-days: 7
 
   test-coverage:
@@ -123,27 +125,28 @@ jobs:
       
       - name: Install dependencies and run coverage
         run: |
+          cd autogrow-core
           make install-test-deps
           make test-coverage
       
       - name: Verify coverage file exists
         run: |
-          if [ -f "./tests/htmlcov/coverage.xml" ]; then
+          if [ -f "./autogrow-core/tests/htmlcov/coverage.xml" ]; then
             echo "✅ Coverage XML file generated successfully"
-            ls -lh ./tests/htmlcov/coverage.xml
+            ls -lh ./autogrow-core/tests/htmlcov/coverage.xml
           else
             echo "⚠️ Coverage XML file not found"
             echo "Contents of tests directory:"
-            ls -la ./tests/ || true
+            ls -la ./autogrow-core/tests/ || true
             echo "Contents of tests/htmlcov directory:"
-            ls -la ./tests/htmlcov/ || true
+            ls -la ./autogrow-core/tests/htmlcov/ || true
           fi
       
       - name: Upload coverage to Codecov
-        if: hashFiles('./tests/htmlcov/coverage.xml') != ''
+        if: hashFiles('./autogrow-core/tests/htmlcov/coverage.xml') != ''
         uses: codecov/codecov-action@v4
         with:
-          files: ./tests/htmlcov/coverage.xml
+          files: ./autogrow-core/tests/htmlcov/coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
@@ -153,7 +156,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: tests/htmlcov/
+          path: autogrow-core/tests/htmlcov/
           retention-days: 30
           if-no-files-found: warn
 
@@ -173,6 +176,7 @@ jobs:
       
       - name: Run code quality checks
         run: |
+          cd autogrow-core
           make install-test-deps
           make lint
           make format
@@ -192,24 +196,24 @@ jobs:
       
       - name: Make scripts executable
         run: |
-          chmod +x src/gemini-agent/scripts/*.sh
-          chmod +x src/claude-agent/scripts/*.sh
+          chmod +x autogrow-core/src/gemini-agent/scripts/*.sh
+          chmod +x autogrow-core/src/claude-agent/scripts/*.sh
       
       - name: Test script syntax
         run: |
-          for script in src/gemini-agent/scripts/*.sh; do
+          for script in autogrow-core/src/gemini-agent/scripts/*.sh; do
             echo "Checking $script"
             bash -n "$script"
           done
-          for script in src/claude-agent/scripts/*.sh; do
+          for script in autogrow-core/src/claude-agent/scripts/*.sh; do
             echo "Checking $script"
             bash -n "$script"
           done
       
       - name: Test help commands
         run: |
-          src/gemini-agent/scripts/agent_runner.sh --help || true
-          src/claude-agent/scripts/agent_runner_cli.sh --help || true
+          autogrow-core/src/gemini-agent/scripts/agent_runner.sh --help || true
+          autogrow-core/src/claude-agent/scripts/agent_runner_cli.sh --help || true
 
   summary:
     name: Test Summary
