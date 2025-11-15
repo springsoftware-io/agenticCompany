@@ -5,7 +5,6 @@ Validates PROJECT_BRIEF.md structure and required fields before AI generation
 to prevent wasted API calls and provide better error messages.
 """
 
-import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
@@ -166,8 +165,8 @@ class ProjectBriefValidator:
 
     def _validate_sections(self, content: str, result: ValidationResult):
         """Validate that required sections exist"""
-        # Extract all headers (## Section Name)
-        headers = re.findall(r"^##\s+(.+)$", content, re.MULTILINE)
+        # Extract all headers (## Section Name) - simple line parsing
+        headers = [line.replace("##", "").strip() for line in content.split("\n") if line.startswith("##")]
 
         result.metadata["sections_found"] = headers
 
@@ -192,25 +191,13 @@ class ProjectBriefValidator:
                 "Recommended minimum: 1000 characters for comprehensive documentation"
             )
 
-        # Check for placeholder text
-        placeholder_patterns = [
-            r"\[.*?\]",  # [Placeholder text]
-            r"TODO",
-            r"FIXME",
-            r"TBD",
-            r"Fill.*here",
-            r"Your.*here",
-        ]
-
-        placeholders_found = []
-        for pattern in placeholder_patterns:
-            matches = re.findall(pattern, content, re.IGNORECASE)
-            placeholders_found.extend(matches)
+        # Check for placeholder text - simple string checks
+        placeholder_keywords = ["TODO", "FIXME", "TBD", "[placeholder", "fill in here", "your text here"]
+        placeholders_found = [kw for kw in placeholder_keywords if kw.lower() in content.lower()]
 
         if placeholders_found:
             result.add_warning(
-                f"Found {len(placeholders_found)} potential placeholders that may need completion: "
-                f"{', '.join(set(placeholders_found[:5]))}"
+                f"Found {len(placeholders_found)} potential placeholder keywords: {', '.join(placeholders_found)}"
             )
 
     def _validate_overview_section(self, content: str, result: ValidationResult):
@@ -219,51 +206,26 @@ class ProjectBriefValidator:
         if "project overview" not in content.lower():
             result.add_warning("Could not find Project Overview section - skipping detailed validation")
             return
-            
-        overview_match = re.search(
-            r"project overview.*?\n(.*?)(?=\n##|\Z)",
-            content,
-            re.DOTALL | re.IGNORECASE,
-        )
-
-        if not overview_match:
+        
+        # Extract content between "project overview" and next ## or end
+        start_idx = content.lower().find("project overview")
+        if start_idx < 0:
             result.add_warning("Could not parse Project Overview section - skipping detailed validation")
             return
+        
+        # Find the next ## section or end of content
+        next_section = content.find("\n##", start_idx + 1)
+        if next_section < 0:
+            overview_content = content[start_idx:]
+        else:
+            overview_content = content[start_idx:next_section]
 
-        overview_content = overview_match.group(1)
-
-        # Check required fields
+        # Check required fields - just verify they exist
         for field in self.REQUIRED_OVERVIEW_FIELDS:
-            pattern = re.compile(
-                r"\*\*" + re.escape(field) + r"\*\*\s*:\s*(.+)", re.IGNORECASE
-            )
-            match = pattern.search(overview_content)
-
-            if not match:
+            if field.lower() not in overview_content.lower():
                 result.add_error(
                     f"Missing required field in Project Overview: '{field}'"
                 )
-            else:
-                # Check field content length
-                field_content = match.group(1).strip()
-
-                if (
-                    field == "Brief Description"
-                    and len(field_content) < self.MIN_DESCRIPTION_LENGTH
-                ):
-                    result.add_warning(
-                        f"'{field}' is too short ({len(field_content)} chars). "
-                        f"Recommended minimum: {self.MIN_DESCRIPTION_LENGTH} characters"
-                    )
-
-                if (
-                    field == "Problem Statement"
-                    and len(field_content) < self.MIN_PROBLEM_STATEMENT_LENGTH
-                ):
-                    result.add_warning(
-                        f"'{field}' is too short ({len(field_content)} chars). "
-                        f"Recommended minimum: {self.MIN_PROBLEM_STATEMENT_LENGTH} characters"
-                    )
 
     def _validate_requirements_section(self, content: str, result: ValidationResult):
         """Validate Core Requirements section"""
@@ -271,18 +233,19 @@ class ProjectBriefValidator:
         if "core requirements" not in content.lower():
             result.add_warning("Could not find Core Requirements section - skipping detailed validation")
             return
-            
-        requirements_match = re.search(
-            r"core requirements.*?\n(.*?)(?=\n##|\Z)",
-            content,
-            re.DOTALL | re.IGNORECASE,
-        )
-
-        if not requirements_match:
+        
+        # Extract content between "core requirements" and next ## or end
+        start_idx = content.lower().find("core requirements")
+        if start_idx < 0:
             result.add_warning("Could not parse Core Requirements section - skipping detailed validation")
             return
-
-        requirements_content = requirements_match.group(1)
+        
+        # Find the next ## section or end of content
+        next_section = content.find("\n##", start_idx + 1)
+        if next_section < 0:
+            requirements_content = content[start_idx:]
+        else:
+            requirements_content = content[start_idx:next_section]
 
         # Check minimum length - make this a warning instead of error
         if len(requirements_content.strip()) < self.MIN_REQUIREMENTS_LENGTH:
@@ -292,12 +255,8 @@ class ProjectBriefValidator:
             )
 
         # Check for both functional and non-functional requirements
-        has_functional = re.search(
-            r"Functional Requirements", requirements_content, re.IGNORECASE
-        )
-        has_non_functional = re.search(
-            r"Non-Functional Requirements", requirements_content, re.IGNORECASE
-        )
+        has_functional = "functional requirements" in requirements_content.lower()
+        has_non_functional = "non-functional requirements" in requirements_content.lower()
 
         if not has_functional:
             result.add_warning("Missing 'Functional Requirements' subsection")
@@ -305,10 +264,8 @@ class ProjectBriefValidator:
         if not has_non_functional:
             result.add_warning("Missing 'Non-Functional Requirements' subsection")
 
-        # Count requirements (numbered or bulleted lists) - more lenient pattern
-        functional_reqs = len(
-            re.findall(r"^\s*[-*]\s+", requirements_content, re.MULTILINE)
-        )
+        # Count requirements (bulleted lists)
+        functional_reqs = requirements_content.count("\n- ") + requirements_content.count("\n* ")
 
         if functional_reqs < 2:
             result.add_warning(
@@ -335,31 +292,21 @@ class ProjectBriefValidator:
 
         # Check completion checklist if exists
         if "completion checklist" in content.lower():
-            # Check if checklist items are marked complete
-            checklist_match = re.search(
-                r"completion checklist.*?\n(.*?)(?=\n##|\Z)",
-                content,
-                re.DOTALL | re.IGNORECASE,
-            )
+            # Simple count of checked/unchecked items
+            unchecked = content.count("- [ ]")
+            checked = content.lower().count("- [x]")
 
-            if checklist_match:
-                checklist_content = checklist_match.group(1)
-                unchecked = len(re.findall(r"-\s+\[\s\]", checklist_content))
-                checked = len(
-                    re.findall(r"-\s+\[x\]", checklist_content, re.IGNORECASE)
+            result.metadata["checklist_progress"] = {
+                "checked": checked,
+                "unchecked": unchecked,
+                "total": checked + unchecked,
+            }
+
+            if unchecked > 0:
+                result.add_warning(
+                    f"Completion checklist has {unchecked} unchecked items. "
+                    "Ensure all sections are complete before AI generation."
                 )
-
-                result.metadata["checklist_progress"] = {
-                    "checked": checked,
-                    "unchecked": unchecked,
-                    "total": checked + unchecked,
-                }
-
-                if unchecked > 0:
-                    result.add_warning(
-                        f"Completion checklist has {unchecked} unchecked items. "
-                        "Ensure all sections are complete before AI generation."
-                    )
 
 
 def validate_project_brief(
