@@ -117,6 +117,14 @@
             background: #ff9800;
         }
 
+        .badge.automated {
+            background: #2196F3;
+        }
+
+        .badge.advanced {
+            background: #9C27B0;
+        }
+
         .btn {
             display: inline-block;
             background: #667eea;
@@ -272,10 +280,18 @@
             <p>Select how you'd like to authenticate and fork SeedGPT:</p>
 
             <div class="setup-options">
+                <div class="option-card" onclick="selectMethod('manual')" id="manual-option">
+                    <h3>
+                        ⚡ Quick Fork
+                        <span class="badge">RECOMMENDED</span>
+                    </h3>
+                    <p>Fork directly on GitHub. Full control, manual setup.</p>
+                </div>
+
                 <div class="option-card" onclick="selectMethod('oauth')" id="oauth-option">
                     <h3>
                         🔐 GitHub OAuth
-                        <span class="badge">RECOMMENDED</span>
+                        <span class="badge automated">AUTOMATED</span>
                     </h3>
                     <p>Authenticate with GitHub and automatically fork the repository. Quick and secure setup with one click.</p>
                 </div>
@@ -283,16 +299,9 @@
                 <div class="option-card" onclick="selectMethod('token')" id="token-option">
                     <h3>
                         🔑 Personal Access Token
-                        <span class="badge warning">MANUAL</span>
+                        <span class="badge advanced">ADVANCED</span>
                     </h3>
                     <p>Use a GitHub Personal Access Token for more control. Requires manual token creation but works without OAuth setup.</p>
-                </div>
-
-                <div class="option-card" onclick="selectMethod('manual')" id="manual-option">
-                    <h3>
-                        ⚡ Manual Fork
-                    </h3>
-                    <p>Fork the repository directly on GitHub. You'll configure everything manually following our documentation.</p>
                 </div>
             </div>
 
