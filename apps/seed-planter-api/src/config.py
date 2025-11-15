@@ -24,7 +24,7 @@ class SeedPlanterConfig(BaseSettings):
         [
             "http://localhost:3000", 
             "http://localhost:5173",
-            "https://seed-planter-frontend-pmxej6pldq-uc.a.run.app",
+            "https://seed-planter-frontend-1068119864554.us-central1.run.app",
             "*"  # Allow all origins for now (can be restricted later)
         ],
         description="CORS allowed origins"

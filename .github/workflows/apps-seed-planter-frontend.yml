@@ -47,7 +47,7 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          VITE_API_URL: https://seed-planter-api-PLACEHOLDER.run.app
+          VITE_API_URL: https://seed-planter-frontend-1068119864554.us-central1.run.app
 
       - name: Run tests
         run: |
