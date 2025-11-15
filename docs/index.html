@@ -480,6 +480,7 @@
         // Get it from: gcloud run services describe seed-planter-frontend --region us-central1 --format 'value(status.url)'
         const FRONTEND_APP_URL = 'https://seed-planter-frontend-PLACEHOLDER.run.app';
         let allProjects = [];
+        let originalRepoStars = 0;
 
         // Modal functions
         function openModal() {
@@ -517,6 +518,13 @@
 
         async function fetchForks() {
             try {
+                // Fetch original repository to get its star count
+                const repoResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`);
+                if (repoResponse.ok) {
+                    const repoData = await repoResponse.json();
+                    originalRepoStars = repoData.stargazers_count;
+                }
+
                 const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=100&sort=stargazers`);
                 
                 if (!response.ok) {
@@ -577,7 +585,8 @@
         }
 
         function updateStats() {
-            const totalStars = allProjects.reduce((sum, p) => sum + p.stars, 0);
+            const forksStars = allProjects.reduce((sum, p) => sum + p.stars, 0);
+            const totalStars = originalRepoStars + forksStars;
             const activeProjects = allProjects.filter(p => p.isActive).length;
 
             document.getElementById('totalForks').textContent = allProjects.length;
