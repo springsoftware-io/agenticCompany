@@ -171,21 +171,15 @@ class ProjectBriefValidator:
 
         result.metadata["sections_found"] = headers
 
-        # Check required sections - use flexible matching for AI-friendly free text
+        # Check required sections - simple case-insensitive matching
         for required_section in self.REQUIRED_SECTIONS:
-            # Match section name anywhere in a heading, ignoring emojis and extra text
-            pattern = re.compile(
-                r"##\s+.*" + re.escape(required_section), re.IGNORECASE
-            )
-            if not pattern.search(content):
+            # Just search for the section name in any ## heading
+            if not re.search(rf"##.*?{re.escape(required_section)}", content, re.IGNORECASE):
                 result.add_error(f"Missing required section: '{required_section}'")
 
         # Check recommended sections
         for recommended_section in self.RECOMMENDED_SECTIONS:
-            pattern = re.compile(
-                r"##\s+.*" + re.escape(recommended_section), re.IGNORECASE
-            )
-            if not pattern.search(content):
+            if not re.search(rf"##.*?{re.escape(recommended_section)}", content, re.IGNORECASE):
                 result.add_warning(
                     f"Missing recommended section: '{recommended_section}'"
                 )
@@ -222,9 +216,9 @@ class ProjectBriefValidator:
 
     def _validate_overview_section(self, content: str, result: ValidationResult):
         """Validate Project Overview section"""
-        # Extract overview section - more lenient regex accepting any emoji
+        # Simple case-insensitive search for "Project Overview"
         overview_match = re.search(
-            r"##\s+[^\n]*Project Overview[^\n]*\n(.*?)(?=\n##|\Z)",
+            r"##.*?project overview.*?\n(.*?)(?=\n##|\Z)",
             content,
             re.DOTALL | re.IGNORECASE,
         )
@@ -270,9 +264,9 @@ class ProjectBriefValidator:
 
     def _validate_requirements_section(self, content: str, result: ValidationResult):
         """Validate Core Requirements section"""
-        # More lenient regex - accept any emoji or no emoji
+        # Simple case-insensitive search for "Core Requirements"
         requirements_match = re.search(
-            r"##\s+[^\n]*Core Requirements[^\n]*\n(.*?)(?=\n##|\Z)",
+            r"##.*?core requirements.*?\n(.*?)(?=\n##|\Z)",
             content,
             re.DOTALL | re.IGNORECASE,
         )
@@ -333,13 +327,10 @@ class ProjectBriefValidator:
         # Skip empty section check - AI can handle free-form text and various formats
 
         # Check completion checklist if exists
-        if (
-            "## ✅ Completion Checklist" in content
-            or "## Completion Checklist" in content
-        ):
+        if re.search(r"##.*?completion checklist", content, re.IGNORECASE):
             # Check if checklist items are marked complete
             checklist_match = re.search(
-                r"##\s+[✅]?\s*Completion Checklist\s*\n(.*?)(?=\n##|\Z)",
+                r"##.*?completion checklist.*?\n(.*?)(?=\n##|\Z)",
                 content,
                 re.DOTALL | re.IGNORECASE,
             )
