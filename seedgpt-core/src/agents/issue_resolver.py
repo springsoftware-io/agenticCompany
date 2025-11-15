@@ -97,7 +97,7 @@ class IssueResolver:
         self.anthropic_api_key = anthropic_api_key
         # Empty list means handle all issue types, None defaults to ["bug", "enhancement"]
         self.labels_to_handle = labels_to_handle if labels_to_handle is not None else ["bug", "enhancement"]
-        self.labels_to_skip = labels_to_skip or ["wontfix", "duplicate", "in-progress"]
+        self.labels_to_skip = labels_to_skip or ["wontfix", "duplicate", "in-progress", "qa-report"]
         self.max_time = max_time
         self.dry_mode = dry_mode
         self.start_time = time.time()

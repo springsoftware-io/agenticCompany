@@ -148,7 +148,7 @@ jobs:
     name: Notify Deployment
     runs-on: ubuntu-latest
     needs: build-and-deploy
-    if: always()
+    if: always() && needs.build-and-deploy.result != 'skipped'
 
     steps:
       - name: Deployment Status

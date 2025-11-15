@@ -9,15 +9,15 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/marketing-agent.yml'
-      - '.github/workflows/specialized-agents.yml'
+      - '.github/workflows/core-marketing-agent.yml'
+      - '.github/workflows/core-specialized-agents.yml'
       - 'seedgpt-core/src/agents/marketing_agent.py'
       - 'seedgpt-core/src/agents/base_issue_agent.py'
 
   pull_request:
     paths:
-      - '.github/workflows/marketing-agent.yml'
-      - '.github/workflows/specialized-agents.yml'
+      - '.github/workflows/core-marketing-agent.yml'
+      - '.github/workflows/core-specialized-agents.yml'
       - 'seedgpt-core/src/agents/marketing_agent.py'
       - 'seedgpt-core/src/agents/base_issue_agent.py'
 
@@ -42,7 +42,7 @@ permissions:
 jobs:
   validate-on-change:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    uses: ./.github/workflows/specialized-agents.yml
+    uses: ./.github/workflows/core-specialized-agents.yml
     secrets: inherit
     with:
       agent: marketing
@@ -51,7 +51,7 @@ jobs:
 
   run-marketing-agent:
     if: github.event_name != 'pull_request' && github.event_name != 'push'
-    uses: ./.github/workflows/specialized-agents.yml
+    uses: ./.github/workflows/core-specialized-agents.yml
     secrets: inherit
     with:
       agent: marketing
