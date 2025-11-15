@@ -69,6 +69,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate Required Secrets
+        run: |
+          echo "🔍 Validating required secrets and configuration..."
+          
+          MISSING_SECRETS=()
+          
+          # Check for GCP credentials
+          if [ -z "${{ secrets.GCP_CREDENTIALS }}" ]; then
+            MISSING_SECRETS+=("GCP_CREDENTIALS")
+          fi
+          
+          # Check for GitHub PAT token
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            MISSING_SECRETS+=("PAT_TOKEN")
+          fi
+          
+          # Check for Anthropic API key
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            MISSING_SECRETS+=("ANTHROPIC_API_KEY")
+          fi
+          
+          # If any secrets are missing, provide helpful error message
+          if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
+            echo "❌ ERROR: Missing required GitHub secrets!"
+            echo ""
+            echo "The following secrets need to be configured in your repository:"
+            echo ""
+            for secret in "${MISSING_SECRETS[@]}"; do
+              echo "  • $secret"
+            done
+            echo ""
+            echo "📚 How to add secrets:"
+            echo "  1. Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "  2. Click 'New repository secret'"
+            echo "  3. Add each missing secret with its value"
+            echo ""
+            echo "📖 Secret descriptions:"
+            echo "  • GCP_CREDENTIALS: Google Cloud service account JSON key"
+            echo "  • PAT_TOKEN: GitHub Personal Access Token for repository operations"
+            echo "  • ANTHROPIC_API_KEY: Anthropic API key for Claude AI integration"
+            echo ""
+            echo "For more information, see: docs/GITHUB_SECRETS.md"
+            exit 1
+          fi
+          
+          echo "✅ All required secrets are configured!"
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:

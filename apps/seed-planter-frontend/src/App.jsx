@@ -46,7 +46,7 @@ function App() {
           {/* Input Section */}
           <div className="space-y-6">
             <div className="card">
-              <h2 className="text-xl font-semibold mb-4">Try AutoGrow Now</h2>
+              <h2 className="text-xl font-semibold mb-4">Try SeedGPT Now</h2>
               <p className="text-gray-600 mb-6">
                 Describe your project idea and watch AI create the seed of your new business, and grow it. 
                 It simply does everything for you until you earn money.
@@ -220,7 +220,7 @@ function App() {
               <div className="card text-center py-12">
                 <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">
-                  Enter a project idea to see AutoGrow in action
+                  Enter a project idea to see SeedGPT in action
                 </p>
               </div>
             )}

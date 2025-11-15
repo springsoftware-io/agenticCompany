@@ -10,8 +10,10 @@ The following secrets are configured in the repository:
 |------------|---------|--------------|
 | `GEMINI_API_KEY` | Gemini API authentication | Integration tests (Gemini) |
 | `GOOGLE_CLOUD_PROJECT` | Google Cloud project ID | Gemini API calls |
-| `ANTHROPIC_API_KEY` | Anthropic API authentication | Integration tests (Claude) |
+| `ANTHROPIC_API_KEY` | Anthropic API authentication | Integration tests (Claude), Seed Planter API |
 | `GITHUB_TOKEN` | GitHub API authentication | Issue resolver workflow |
+| `GCP_CREDENTIALS` | Google Cloud service account JSON | Seed Planter API deployment |
+| `PAT_TOKEN` | GitHub Personal Access Token | Seed Planter API repository operations |
 
 ## ✅ Secrets Set
 
@@ -110,6 +112,43 @@ gh auth status
 6. Add to `src/claude-agent/.env`:
    ```bash
    ANTHROPIC_API_KEY=sk-ant-...your-key-here
+   ```
+
+### GCP Credentials (Service Account)
+
+1. Visit: https://console.cloud.google.com/
+2. Select your project
+3. Go to **IAM & Admin** → **Service Accounts**
+4. Click **Create Service Account**
+5. Name it (e.g., "github-actions-deploy")
+6. Grant roles:
+   - Cloud Run Admin
+   - Service Account User
+   - Storage Admin (for container registry)
+7. Click **Done**
+8. Click on the service account
+9. Go to **Keys** tab
+10. Click **Add Key** → **Create new key**
+11. Choose **JSON** format
+12. Save the downloaded JSON file
+13. Set as secret:
+    ```bash
+    cat path/to/service-account-key.json | gh secret set GCP_CREDENTIALS
+    ```
+
+### PAT Token (Personal Access Token)
+
+1. Visit: https://github.com/settings/tokens
+2. Click **Generate new token** → **Generate new token (classic)**
+3. Name it (e.g., "Seed Planter API")
+4. Select scopes:
+   - `repo` (Full control of private repositories)
+   - `workflow` (Update GitHub Action workflows)
+5. Click **Generate token**
+6. Copy the token (starts with `ghp_...`)
+7. Set as secret:
+   ```bash
+   echo "ghp_...your-token" | gh secret set PAT_TOKEN
    ```
 
 ## 📝 Setting Secrets
@@ -326,14 +365,28 @@ Before running CI/CD workflows:
 
 - [ ] GitHub CLI installed and authenticated
 - [ ] `.env` files configured with API keys
-- [ ] Secrets set in GitHub repository
+- [ ] All required secrets set in GitHub repository:
+  - [ ] `GEMINI_API_KEY`
+  - [ ] `GOOGLE_CLOUD_PROJECT`
+  - [ ] `ANTHROPIC_API_KEY`
+  - [ ] `GITHUB_TOKEN`
+  - [ ] `GCP_CREDENTIALS` (for Seed Planter API)
+  - [ ] `PAT_TOKEN` (for Seed Planter API)
 - [ ] Secrets verified with `gh secret list`
 - [ ] Test workflow runs successfully
 - [ ] `.env` files added to `.gitignore`
 - [ ] `.env.example` files created (without real values)
 
+### For Seed Planter API Deployment
+
+- [ ] GCP project created and configured
+- [ ] Service account created with proper roles
+- [ ] Cloud Run API enabled
+- [ ] Container Registry API enabled
+- [ ] GitHub PAT token created with `repo` and `workflow` scopes
+
 ---
 
-**Last Updated**: November 13, 2025  
+**Last Updated**: November 15, 2025  
 **Repository**: roeiba/seedGPT  
-**Status**: ✅ All secrets configured
+**Status**: ⚠️ Requires GCP_CREDENTIALS and PAT_TOKEN for Seed Planter API deployment

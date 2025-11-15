@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Rename AutoGrow to SeedGPT across the entire repository
+# Rename script - AutoGrow to SeedGPT (already completed)
 # This script handles all case variations
 
 set -e

@@ -4,7 +4,7 @@ Modern React application providing an intuitive interface for the SeedGPT sandbo
 
 ## Overview
 
-The Sandbox Frontend allows users to describe project ideas and watch in real-time as AI generates complete project structures, issues, and pull requests - demonstrating AutoGrow's capabilities before users commit resources.
+The Sandbox Frontend allows users to describe project ideas and watch in real-time as AI generates complete project structures, issues, and pull requests - demonstrating SeedGPT's capabilities before users commit resources.
 
 ## Features
 

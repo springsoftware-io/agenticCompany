@@ -1,10 +1,10 @@
 # SeedGPT Sandbox API
 
-FastAPI-based REST API for managing isolated preview environments where users can test AutoGrow functionality in real-time.
+FastAPI-based REST API for managing isolated preview environments where users can test SeedGPT functionality in real-time.
 
 ## Overview
 
-The Sandbox API creates temporary GitHub repositories with AI-generated project structures, issues, and pull requests, allowing users to experience AutoGrow's capabilities before committing resources.
+The Sandbox API creates temporary GitHub repositories with AI-generated project structures, issues, and pull requests, allowing users to experience SeedGPT's capabilities before committing resources.
 
 ## Features
 
