@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SeedGPT Showcase - Real Projects Built with AI</title>
     <meta name="description" content="Explore real-world projects built using SeedGPT's autonomous AI development methodology">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <style>
         * {
             margin: 0;
@@ -489,6 +490,10 @@
         const FRONTEND_APP_URL = 'https://seed-planter-frontend-1068119864554.us-central1.run.app';
         let allProjects = [];
         let originalRepoStars = 0;
+        
+        // Optional: Add GitHub token for higher rate limits
+        // You can create a token at: https://github.com/settings/tokens (no scopes needed for public repos)
+        const GITHUB_TOKEN = ''; // Leave empty for anonymous access (60 req/hour)
 
         // Modal functions
         function openModal() {
@@ -529,63 +534,93 @@
             openModal();
         });
 
+        function getHeaders() {
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json'
+            };
+            if (GITHUB_TOKEN) {
+                headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+            }
+            return headers;
+        }
+
         async function fetchForks() {
             try {
                 // Fetch original repository to get its star count
-                const repoResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`);
-                if (repoResponse.ok) {
-                    const repoData = await repoResponse.json();
-                    originalRepoStars = repoData.stargazers_count;
+                const repoResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
+                    headers: getHeaders()
+                });
+                
+                if (!repoResponse.ok) {
+                    const rateLimitRemaining = repoResponse.headers.get('X-RateLimit-Remaining');
+                    const rateLimitReset = repoResponse.headers.get('X-RateLimit-Reset');
+                    
+                    if (repoResponse.status === 403 && rateLimitRemaining === '0') {
+                        const resetDate = new Date(parseInt(rateLimitReset) * 1000);
+                        throw new Error(`RATE_LIMIT:${resetDate.toLocaleTimeString()}`);
+                    }
+                    throw new Error(`HTTP ${repoResponse.status}`);
                 }
+                
+                const repoData = await repoResponse.json();
+                originalRepoStars = repoData.stargazers_count;
 
-                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=100&sort=stargazers`);
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=100&sort=stargazers`, {
+                    headers: getHeaders()
+                });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch forks');
+                    const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+                    const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+                    
+                    if (response.status === 403 && rateLimitRemaining === '0') {
+                        const resetDate = new Date(parseInt(rateLimitReset) * 1000);
+                        throw new Error(`RATE_LIMIT:${resetDate.toLocaleTimeString()}`);
+                    }
+                    throw new Error(`HTTP ${response.status}`);
                 }
 
                 const forks = await response.json();
                 
-                // Fetch additional details for each fork
-                const projectsWithDetails = await Promise.all(
-                    forks.map(async (fork) => {
-                        try {
-                            // Get commit activity to determine if project is active
-                            const commitsResponse = await fetch(fork.commits_url.replace('{/sha}', '?per_page=1'));
-                            const commits = await commitsResponse.json();
-                            const lastCommit = commits[0]?.commit?.author?.date || fork.updated_at;
+                // Map forks to project objects (removed commit fetching to reduce API calls)
+                allProjects = forks.map(fork => ({
+                    name: fork.name,
+                    fullName: fork.full_name,
+                    owner: fork.owner.login,
+                    ownerAvatar: fork.owner.avatar_url,
+                    description: fork.description || 'No description provided',
+                    stars: fork.stargazers_count,
+                    forks: fork.forks_count,
+                    language: fork.language,
+                    url: fork.html_url,
+                    updated: new Date(fork.updated_at),
+                    created: new Date(fork.created_at),
+                    isActive: isProjectActive(fork.updated_at)
+                }));
 
-                            return {
-                                name: fork.name,
-                                fullName: fork.full_name,
-                                owner: fork.owner.login,
-                                ownerAvatar: fork.owner.avatar_url,
-                                description: fork.description || 'No description provided',
-                                stars: fork.stargazers_count,
-                                forks: fork.forks_count,
-                                language: fork.language,
-                                url: fork.html_url,
-                                updated: new Date(fork.updated_at),
-                                created: new Date(fork.created_at),
-                                lastCommit: new Date(lastCommit),
-                                isActive: isProjectActive(lastCommit)
-                            };
-                        } catch (error) {
-                            console.error(`Error fetching details for ${fork.full_name}:`, error);
-                            return null;
-                        }
-                    })
-                );
-
-                allProjects = projectsWithDetails.filter(p => p !== null);
                 updateStats();
                 displayProjects(allProjects);
             } catch (error) {
                 console.error('Error fetching forks:', error);
+                
+                let errorMessage = 'Unable to load projects. Please try again later.';
+                let errorDetails = '';
+                
+                if (error.message.startsWith('RATE_LIMIT:')) {
+                    const resetTime = error.message.split(':')[1];
+                    errorMessage = 'GitHub API Rate Limit Exceeded';
+                    errorDetails = `<p style="margin-top: 10px;">The page has exceeded GitHub's API rate limit. Rate limit will reset at ${resetTime}.</p>
+                                   <p style="margin-top: 10px; font-size: 0.9rem;">To increase the rate limit, you can add a GitHub personal access token to the page source (no scopes needed for public repos).</p>`;
+                }
+                
                 document.getElementById('projectsContainer').innerHTML = `
                     <div class="error">
                         <h2>Oops! Something went wrong</h2>
-                        <p>Unable to load projects. Please try again later.</p>
+                        <p>${errorMessage}</p>
+                        ${errorDetails}
+                        <a href="https://github.com/${REPO_OWNER}/${REPO_NAME}/forks" class="cta-button" style="margin-top: 20px; background: white; color: #ff6b6b;">
+                            View Forks on GitHub
+                        </a>
                     </div>
                 `;
             }
