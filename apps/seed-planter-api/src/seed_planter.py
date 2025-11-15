@@ -68,26 +68,26 @@ class SeedPlanter:
         )
 
         try:
-            # Step 1: Create GitHub Organization
-            logger.info(f"📦 Step 1/6: Creating GitHub organization")
+            # Step 1: Create GitHub Repository
+            logger.info(f"📦 Step 1/6: Creating GitHub repository")
             await self._update_progress(
                 progress_callback, project_id, ProjectStatus.CREATING_ORG,
-                f"Creating GitHub organization '{org_name}'...", 10
+                f"Creating GitHub repository '{org_name}'...", 10
             )
             
-            org_repo = await self._create_github_org(org_name, project_description)
-            details.org_url = org_repo.html_url
-            logger.info(f"✅ Organization created: {org_repo.html_url}")
+            main_repo = await self._create_github_repo(org_name, project_description)
+            details.repo_url = main_repo.html_url
+            details.org_url = f"https://github.com/{main_repo.owner.login}"
+            logger.info(f"✅ Repository created: {main_repo.html_url}")
 
-            # Step 2: Fork SeedGPT template
+            # Step 2: Fork SeedGPT template into the repo
             logger.info(f"🔀 Step 2/6: Forking SeedGPT template")
             await self._update_progress(
                 progress_callback, project_id, ProjectStatus.FORKING_TEMPLATE,
                 "Forking SeedGPT template repository...", 25
             )
             
-            main_repo = await self._fork_seedgpt_template(org_repo, org_name, workspace)
-            details.repo_url = main_repo.html_url
+            await self._fork_seedgpt_template(main_repo, org_name, workspace)
             logger.info(f"✅ Template forked successfully: {main_repo.html_url}")
 
             # Step 3: Customize project
@@ -177,71 +177,75 @@ class SeedPlanter:
         timestamp = datetime.utcnow().strftime('%y%m%d')
         return f"{org_name}-{timestamp}"
 
-    async def _create_github_org(self, org_name: str, description: str):
-        """Create a GitHub organization for the project"""
+    async def _create_github_repo(self, repo_name: str, description: str):
+        """
+        Create a GitHub repository for the project
+        
+        Note: GitHub API does not support programmatic organization creation.
+        Organizations must be created manually through GitHub's web interface.
+        
+        For SaaS mode, we create repositories under the SeedGPT account.
+        For User mode (future), repositories would be created under user's account.
+        """
         
         try:
-            # Note: GitHub API doesn't support org creation via API for regular users
-            # For SaaS mode, we'll create repos under the user account with org-like naming
-            # In production, this would use GitHub Apps or manual org creation
-            
-            # For now, we'll simulate by creating a repo that acts as the org
             user = self.gh.get_user()
+            logger.info(f"   Creating repository under user: {user.login}")
             
-            # Create a "meta" repository for the organization
-            org_repo = user.create_repo(
-                name=org_name,
+            # Create the main project repository
+            repo = user.create_repo(
+                name=repo_name,
                 description=f"🌱 {description}",
                 private=False,
                 auto_init=True,
+                has_issues=True,
+                has_projects=True,
+                has_wiki=False,
             )
             
-            # Add organization label
-            org_repo.create_label("seedgpt-project", "00D084", "SeedGPT planted project")
+            # Add SeedGPT label
+            repo.create_label("seedgpt-planted", "00D084", "🌱 Planted by SeedGPT")
             
-            return org_repo
+            logger.info(f"   Repository created: {repo.html_url}")
+            return repo
             
         except GithubException as e:
-            raise Exception(f"Failed to create GitHub organization: {e}")
+            if e.status == 422 and "name already exists" in str(e):
+                raise Exception(f"Repository '{repo_name}' already exists. Please try a different name.")
+            raise Exception(f"Failed to create GitHub repository: {e}")
 
-    async def _fork_seedgpt_template(self, org, org_name: str, workspace: Path):
-        """Fork SeedGPT template repository"""
+    async def _fork_seedgpt_template(self, target_repo, repo_name: str, workspace: Path):
+        """
+        Fork SeedGPT template into the target repository
+        
+        Clones the template, removes workflows (to avoid scope issues),
+        and pushes to the newly created repository.
+        """
         
         try:
-            # Get the template repository
-            template_repo = self.gh.get_repo(config.seedgpt_template_repo)
-            
             # Clone template to workspace
             repo_path = workspace / "repo"
             auth_url = f"https://x-access-token:{config.github_token}@github.com/{config.seedgpt_template_repo}.git"
+            logger.info(f"   Cloning template from {config.seedgpt_template_repo}")
             git_repo = git.Repo.clone_from(auth_url, repo_path)
             
             # Remove .github/workflows directory to avoid workflow scope requirement
             workflows_path = repo_path / ".github" / "workflows"
             if workflows_path.exists():
-                logger.info(f"   Removing .github/workflows to avoid workflow scope requirement")
+                logger.info(f"   Removing .github/workflows (no workflow scope in PAT)")
                 shutil.rmtree(workflows_path)
                 # Commit the removal
                 git_repo.index.remove(['.github/workflows'], r=True, ignore_unmatch=True)
                 git_repo.index.commit("chore: Remove workflows for initial setup")
             
-            # Create new repo under user account (simulating org)
-            user = self.gh.get_user()
-            new_repo = user.create_repo(
-                name=f"{org_name}-main",
-                description=f"Main repository for {org_name}",
-                private=False,
-            )
-            
-            # Change remote and push
+            # Change remote to target repo and push
             git_repo.delete_remote('origin')
-            new_remote_url = f"https://x-access-token:{config.github_token}@github.com/{new_repo.full_name}.git"
+            new_remote_url = f"https://x-access-token:{config.github_token}@github.com/{target_repo.full_name}.git"
             git_repo.create_remote('origin', new_remote_url)
             
-            # Push all branches
-            git_repo.git.push('origin', '--all')
-            
-            return new_repo
+            logger.info(f"   Pushing template to {target_repo.full_name}")
+            # Force push to overwrite the auto-init commit
+            git_repo.git.push('origin', 'main', '--force')
             
         except Exception as e:
             raise Exception(f"Failed to fork SeedGPT template: {e}")
