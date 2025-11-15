@@ -75,10 +75,9 @@ class SeedPlanter:
                 f"Creating GitHub organization '{org_name}'...", 10
             )
             
-            org_url, repo_url = await self._create_github_org_and_repo(org_name, project_description, workspace)
-            details.org_url = org_url
-            details.repo_url = repo_url
-            logger.info(f"✅ Organization created: {org_url}")
+            org_repo = await self._create_github_org(org_name, project_description)
+            details.org_url = org_repo.html_url
+            logger.info(f"✅ Organization created: {org_repo.html_url}")
 
             # Step 2: Fork SeedGPT template
             logger.info(f"🔀 Step 2/6: Forking SeedGPT template")
@@ -87,8 +86,9 @@ class SeedPlanter:
                 "Forking SeedGPT template repository...", 25
             )
             
-            await self._fork_and_customize_template(repo_url, workspace)
-            logger.info(f"✅ Template forked successfully")
+            main_repo = await self._fork_seedgpt_template(org_repo, org_name, workspace)
+            details.repo_url = main_repo.html_url
+            logger.info(f"✅ Template forked successfully: {main_repo.html_url}")
 
             # Step 3: Customize project
             logger.info(f"🤖 Step 3/6: Customizing project with AI")
@@ -97,8 +97,8 @@ class SeedPlanter:
                 "Customizing project with AI...", 40
             )
             
-            customization_result = await self._customize_with_ai(
-                project_name, project_description, workspace
+            await self._customize_project(
+                main_repo, workspace, project_name, project_description
             )
             logger.info(f"✅ AI customization complete")
 
@@ -135,7 +135,7 @@ class SeedPlanter:
                 "Creating initial development issues...", 90
             )
             
-            issues_created = await self._create_initial_issues(repo_url, project_description)
+            issues_created = await self._create_initial_issues(main_repo, project_description)
             logger.info(f"✅ Created {issues_created} initial issues")
 
             # Complete
