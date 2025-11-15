@@ -242,22 +242,58 @@ class PRFailureResolver:
                 logger.debug(f"Skipping #{pr.number}: Already claimed by agent")
                 continue
 
-            # Check if PR has failing checks
+            # Check if PR has failing checks or merge conflicts
             try:
+                # Check for merge conflicts
+                has_merge_conflict = False
+                mergeable_state = pr.mergeable_state
+                logger.debug(f"PR #{pr.number} mergeable_state: {mergeable_state}")
+                
+                if mergeable_state in ['dirty', 'conflicting']:
+                    has_merge_conflict = True
+                    logger.debug(f"PR #{pr.number} has merge conflicts")
+                
+                # Check for failing check runs
                 checks = get_pr_checks(pr)
-                has_failures = any(
+                has_check_failures = any(
                     check.conclusion in ['failure', 'timed_out', 'action_required']
                     for check in checks
                 )
-
-                if not has_failures:
-                    logger.debug(f"Skipping #{pr.number}: No failing checks")
+                
+                if has_check_failures:
+                    logger.debug(f"PR #{pr.number} has failing checks")
+                
+                # Check combined status (for older-style status checks)
+                has_status_failures = False
+                try:
+                    commits = list(pr.get_commits())
+                    if commits:
+                        latest_commit = commits[-1]
+                        combined_status = latest_commit.get_combined_status()
+                        if combined_status.state in ['failure', 'error']:
+                            has_status_failures = True
+                            logger.debug(f"PR #{pr.number} has failing status checks")
+                except Exception as status_err:
+                    logger.debug(f"Could not check combined status for PR #{pr.number}: {status_err}")
+                
+                # Select PR if it has any type of failure
+                if not (has_merge_conflict or has_check_failures or has_status_failures):
+                    logger.debug(f"Skipping #{pr.number}: No failures detected")
                     continue
 
+                # Determine failure reason
+                failure_reasons = []
+                if has_merge_conflict:
+                    failure_reasons.append("merge conflicts")
+                if has_check_failures:
+                    failure_reasons.append("failing checks")
+                if has_status_failures:
+                    failure_reasons.append("failing status")
+                
                 logger.info(f"SELECTED: PR #{pr.number}")
                 logger.info(f"Title: {pr.title}")
                 logger.info(f"Branch: {pr.head.ref}")
-                logger.info(f"Reason: Has failing checks (checked {prs_checked} PRs total)")
+                logger.info(f"Reason: {', '.join(failure_reasons)} (checked {prs_checked} PRs total)")
                 return pr
 
             except Exception as e:
@@ -308,43 +344,78 @@ I'm working on fixing the failing checks in this PR.
         logger.info("STEP 3: ANALYZING FAILURES")
         logger.info("-" * 80)
 
+        failure_details = []
+        
+        # Check for merge conflicts
+        mergeable_state = pr.mergeable_state
+        if mergeable_state in ['dirty', 'conflicting']:
+            logger.info("Merge conflict detected")
+            conflict_detail = f"""
+Merge Conflict Detected
+Status: {mergeable_state}
+Description: This PR has merge conflicts that need to be resolved before it can be merged.
+The conflicts may be in one or more files that have been modified in both this branch and the base branch.
+"""
+            failure_details.append(conflict_detail)
+
+        # Check for failing check runs
         try:
             checks = get_pr_checks(pr)
         except Exception as e:
             github_error = get_exception_for_github_error(e, "Failed to get PR checks")
             logger.exception(f"Failed to get PR checks: {github_error}")
-            return None
+            checks = []
 
         failing_checks = [
             check for check in checks
             if check.conclusion in ['failure', 'timed_out', 'action_required']
         ]
 
-        if not failing_checks:
-            logger.warning("No failing checks found")
-            return None
+        if failing_checks:
+            logger.info(f"Found {len(failing_checks)} failing check(s)")
 
-        logger.info(f"Found {len(failing_checks)} failing check(s)")
-
-        failure_details = []
-        for check in failing_checks:
-            logger.info(f"- {check.name}: {check.conclusion}")
-            
-            detail = f"""
+            for check in failing_checks:
+                logger.info(f"- {check.name}: {check.conclusion}")
+                
+                detail = f"""
 Check: {check.name}
 Status: {check.conclusion}
 """
-            
-            # Try to get check run details
-            if hasattr(check, 'output') and check.output:
-                if hasattr(check.output, 'title') and check.output.title:
-                    detail += f"Title: {check.output.title}\n"
-                if hasattr(check.output, 'summary') and check.output.summary:
-                    detail += f"Summary: {check.output.summary[:500]}\n"
-                if hasattr(check.output, 'text') and check.output.text:
-                    detail += f"Details: {check.output.text[:1000]}\n"
-            
-            failure_details.append(detail)
+                
+                # Try to get check run details
+                if hasattr(check, 'output') and check.output:
+                    if hasattr(check.output, 'title') and check.output.title:
+                        detail += f"Title: {check.output.title}\n"
+                    if hasattr(check.output, 'summary') and check.output.summary:
+                        detail += f"Summary: {check.output.summary[:500]}\n"
+                    if hasattr(check.output, 'text') and check.output.text:
+                        detail += f"Details: {check.output.text[:1000]}\n"
+                
+                failure_details.append(detail)
+        
+        # Check combined status (for older-style status checks)
+        try:
+            commits = list(pr.get_commits())
+            if commits:
+                latest_commit = commits[-1]
+                combined_status = latest_commit.get_combined_status()
+                if combined_status.state in ['failure', 'error']:
+                    logger.info(f"Found failing combined status: {combined_status.state}")
+                    for status in combined_status.statuses:
+                        if status.state in ['failure', 'error']:
+                            logger.info(f"- {status.context}: {status.state}")
+                            status_detail = f"""
+Status Check: {status.context}
+State: {status.state}
+Description: {status.description or 'No description available'}
+"""
+                            failure_details.append(status_detail)
+        except Exception as status_err:
+            logger.debug(f"Could not check combined status: {status_err}")
+
+        if not failure_details:
+            logger.warning("No failure details found")
+            return None
 
         return "\n---\n".join(failure_details)
 
