@@ -21,7 +21,12 @@ class SeedPlanterConfig(BaseSettings):
     api_port: int = Field(8000, description="API port")
     api_debug: bool = Field(False, description="Debug mode")
     cors_origins: list[str] = Field(
-        ["http://localhost:3000", "http://localhost:5173"],
+        [
+            "http://localhost:3000", 
+            "http://localhost:5173",
+            "https://seed-planter-frontend-pmxej6pldq-uc.a.run.app",
+            "*"  # Allow all origins for now (can be restricted later)
+        ],
         description="CORS allowed origins"
     )
 
