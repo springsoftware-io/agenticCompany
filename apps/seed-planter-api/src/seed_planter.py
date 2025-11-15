@@ -179,10 +179,11 @@ class SeedPlanter:
 
     async def _create_github_repo(self, repo_name: str, description: str):
         """
-        Create a GitHub repository for the project
+        Create an EMPTY GitHub repository for the project
         
-        Note: GitHub API does not support programmatic organization creation.
-        Organizations must be created manually through GitHub's web interface.
+        The repository is created without any initial files (no README, no .gitignore).
+        This allows us to push the SeedGPT template as the initial commit,
+        making it a true fork/seed of the SeedGPT project.
         
         For SaaS mode, we create repositories under the SeedGPT account.
         For User mode (future), repositories would be created under user's account.
@@ -190,14 +191,14 @@ class SeedPlanter:
         
         try:
             user = self.gh.get_user()
-            logger.info(f"   Creating repository under user: {user.login}")
+            logger.info(f"   Creating EMPTY repository under user: {user.login}")
             
-            # Create the main project repository
+            # Create an EMPTY repository (no auto_init)
             repo = user.create_repo(
                 name=repo_name,
                 description=f"🌱 {description}",
                 private=False,
-                auto_init=True,
+                auto_init=False,  # IMPORTANT: No initial commit
                 has_issues=True,
                 has_projects=True,
                 has_wiki=False,
@@ -206,7 +207,7 @@ class SeedPlanter:
             # Add SeedGPT label
             repo.create_label("seedgpt-planted", "00D084", "🌱 Planted by SeedGPT")
             
-            logger.info(f"   Repository created: {repo.html_url}")
+            logger.info(f"   Empty repository created: {repo.html_url}")
             return repo
             
         except GithubException as e:
@@ -216,39 +217,46 @@ class SeedPlanter:
 
     async def _fork_seedgpt_template(self, target_repo, repo_name: str, workspace: Path):
         """
-        Fork SeedGPT template into the target repository
+        Seed the empty repository with SeedGPT template
         
-        Clones the template, removes workflows (to avoid scope issues),
-        and pushes to the newly created repository.
+        Process:
+        1. Clone SeedGPT template locally
+        2. Remove .github/workflows (to avoid workflow scope requirement)
+        3. Push to the empty target repository
+        
+        This makes the new repo a true seed/fork of SeedGPT.
         """
         
         try:
-            # Clone template to workspace
+            # Clone SeedGPT template to workspace
             repo_path = workspace / "repo"
             auth_url = f"https://x-access-token:{config.github_token}@github.com/{config.seedgpt_template_repo}.git"
-            logger.info(f"   Cloning template from {config.seedgpt_template_repo}")
+            logger.info(f"   Cloning SeedGPT template from {config.seedgpt_template_repo}")
             git_repo = git.Repo.clone_from(auth_url, repo_path)
             
             # Remove .github/workflows directory to avoid workflow scope requirement
             workflows_path = repo_path / ".github" / "workflows"
             if workflows_path.exists():
-                logger.info(f"   Removing .github/workflows (no workflow scope in PAT)")
+                logger.info(f"   Removing .github/workflows (PAT lacks workflow scope)")
                 shutil.rmtree(workflows_path)
-                # Commit the removal
+                # Stage the removal
                 git_repo.index.remove(['.github/workflows'], r=True, ignore_unmatch=True)
-                git_repo.index.commit("chore: Remove workflows for initial setup")
+                # Commit the change
+                git_repo.index.commit("chore: Remove workflows for seeded project")
             
-            # Change remote to target repo and push
+            # Point to the new empty repository
             git_repo.delete_remote('origin')
             new_remote_url = f"https://x-access-token:{config.github_token}@github.com/{target_repo.full_name}.git"
             git_repo.create_remote('origin', new_remote_url)
             
-            logger.info(f"   Pushing template to {target_repo.full_name}")
-            # Force push to overwrite the auto-init commit
-            git_repo.git.push('origin', 'main', '--force')
+            logger.info(f"   Pushing SeedGPT template to empty repo: {target_repo.full_name}")
+            # Push to empty repo (no force needed since it's empty)
+            git_repo.git.push('origin', 'main')
+            
+            logger.info(f"   ✅ Repository seeded with SeedGPT template")
             
         except Exception as e:
-            raise Exception(f"Failed to fork SeedGPT template: {e}")
+            raise Exception(f"Failed to seed repository with SeedGPT template: {e}")
 
     async def _customize_project(
         self, 
