@@ -1,0 +1,5 @@
+# SeedGPT local data
+.seedgpt/
+
+# OS
+.DS_Store
