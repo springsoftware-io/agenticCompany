@@ -42,13 +42,18 @@ SeedGPT supports whatever you want to build:
 
 Just mention it in `PROJECT_BRIEF.md`.
 
-## How to start
+## How to start 
 
-**1. Fork this repo**
-```bash
-git clone https://github.com/YOUR_USERNAME/seedgpt.git
-cd seedgpt
-```
+**The easiest way:** Visit [https://roeiba.github.io/SeedGPT/](https://roeiba.github.io/SeedGPT/) and click "Start Your Own Project"
+
+The web interface will:
+- Guide you through GitHub authentication
+- Automatically fork the repo to your account
+- Help you set up your project
+
+**Or manually:**
+
+**1. Fork this repo on github**
 
 **2. Tell it what to build**
 

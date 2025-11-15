@@ -248,6 +248,121 @@
             opacity: 0.9;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            padding: 5px 10px;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .option-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -261,15 +376,29 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🌱 SeedGPT Showcase</h1>
-            <p class="subtitle">Real projects built with autonomous AI development</p>
-            <a href="https://github.com/roeiba/SeedGPT" class="cta-button">Fork SeedGPT on GitHub</a>
+            <h1>🌱 SeedGPT</h1>
+            <p class="subtitle">The world's first fully autonomous, self-growing software project</p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+                <a href="#" id="startProjectBtn" class="cta-button" style="background: #4CAF50; font-size: 1.1rem; padding: 15px 40px;">
+                    🚀 Start Your Own Project
+                </a>
+                <a href="https://github.com/roeiba/SeedGPT" class="cta-button" style="background: #667eea; font-size: 1.1rem; padding: 15px 40px;">
+                    📖 View Documentation
+                </a>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.9;">
+                Watch AI build your project while you sleep
+            </p>
         </header>
 
         <div class="stats" id="stats">
@@ -285,6 +414,11 @@
                 <div class="stat-number" id="activeProjects">-</div>
                 <div class="stat-label">Active Projects</div>
             </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: white; font-size: 2rem; margin-bottom: 10px;">🌟 Community Projects</h2>
+            <p style="color: white; opacity: 0.9;">See what others are building with SeedGPT</p>
         </div>
 
         <div class="controls">
@@ -315,10 +449,71 @@
         </footer>
     </div>
 
+    <!-- Start Project Modal -->
+    <div id="startModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2>🚀 Start Your Project</h2>
+            <p>Choose how you'd like to get started with SeedGPT:</p>
+            
+            <div class="modal-options">
+                <div class="option-card" onclick="startWithFrontend()">
+                    <h3>
+                        ✨ Guided Setup
+                        <span class="badge">RECOMMENDED</span>
+                    </h3>
+                    <p>Use our interactive web app to authenticate with GitHub and automatically fork the project. Perfect for beginners!</p>
+                </div>
+                
+                <div class="option-card" onclick="forkDirectly()">
+                    <h3>⚡ Quick Fork</h3>
+                    <p>Directly fork the repository on GitHub. You'll need to set up GitHub Actions and secrets manually.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const REPO_OWNER = 'roeiba';
         const REPO_NAME = 'SeedGPT';
+        // TODO: Update this with the actual Cloud Run URL after deployment
+        // Get it from: gcloud run services describe seed-planter-frontend --region us-central1 --format 'value(status.url)'
+        const FRONTEND_APP_URL = 'https://seed-planter-frontend-PLACEHOLDER.run.app';
         let allProjects = [];
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('startModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('startModal').classList.remove('active');
+        }
+
+        function startWithFrontend() {
+            // Redirect to the frontend app which will handle GitHub OAuth
+            window.location.href = FRONTEND_APP_URL;
+        }
+
+        function forkDirectly() {
+            // Open GitHub fork page in new tab
+            window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, '_blank');
+            closeModal();
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('startModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Start project button handler
+        document.getElementById('startProjectBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
 
         async function fetchForks() {
             try {

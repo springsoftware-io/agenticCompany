@@ -105,6 +105,18 @@ docs/
 └── launch-checklist.md         # Launch checklist
 ```
 
+### Updating the Showcase Site
+
+The `index.html` file powers the SeedGPT showcase at https://roeiba.github.io/SeedGPT/
+
+**To update the frontend app URL:**
+```bash
+# Run this script after deploying the seed-planter-frontend
+.agents/scripts/update_frontend_url.sh
+```
+
+This will automatically fetch the Cloud Run URL and update `index.html`.
+
 ## 🌱 Philosophy
 
 **SeedGPT is not a template you fill out once.**
