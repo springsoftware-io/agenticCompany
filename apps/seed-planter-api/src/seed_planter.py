@@ -216,6 +216,15 @@ class SeedPlanter:
             auth_url = f"https://x-access-token:{config.github_token}@github.com/{config.seedgpt_template_repo}.git"
             git_repo = git.Repo.clone_from(auth_url, repo_path)
             
+            # Remove .github/workflows directory to avoid workflow scope requirement
+            workflows_path = repo_path / ".github" / "workflows"
+            if workflows_path.exists():
+                logger.info(f"   Removing .github/workflows to avoid workflow scope requirement")
+                shutil.rmtree(workflows_path)
+                # Commit the removal
+                git_repo.index.remove(['.github/workflows'], r=True, ignore_unmatch=True)
+                git_repo.index.commit("chore: Remove workflows for initial setup")
+            
             # Create new repo under user account (simulating org)
             user = self.gh.get_user()
             new_repo = user.create_repo(
