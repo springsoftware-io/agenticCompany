@@ -46,6 +46,13 @@ export function useSeedPlanter() {
       
       ws.onmessage = (event) => {
         try {
+          // Handle plain text messages (like "pong")
+          if (event.data === 'pong') {
+            logger.debug('Received pong from server')
+            return
+          }
+          
+          // Try to parse as JSON
           const data = JSON.parse(event.data)
           
           if (data.type === 'pong') {
@@ -70,7 +77,7 @@ export function useSeedPlanter() {
             }, 1000)
           }
         } catch (err) {
-          logger.error('Failed to parse WebSocket message:', err)
+          logger.error('Failed to parse WebSocket message:', err, 'Raw data:', event.data)
         }
       }
       
