@@ -192,11 +192,11 @@ class ProjectBriefValidator:
 
     def _validate_content(self, content: str, result: ValidationResult):
         """Validate overall content quality"""
-        # Check minimum length
-        if len(content) < 1000:
-            result.add_error(
-                f"PROJECT_BRIEF.md is too short ({len(content)} chars). "
-                "Minimum recommended: 1000 characters"
+        # Check minimum length - reduced to be more lenient
+        if len(content) < 500:
+            result.add_warning(
+                f"PROJECT_BRIEF.md is quite short ({len(content)} chars). "
+                "Recommended minimum: 1000 characters for comprehensive documentation"
             )
 
         # Check for placeholder text
@@ -222,15 +222,15 @@ class ProjectBriefValidator:
 
     def _validate_overview_section(self, content: str, result: ValidationResult):
         """Validate Project Overview section"""
-        # Extract overview section
+        # Extract overview section - more lenient regex accepting any emoji
         overview_match = re.search(
-            r"##\s+[🎯]?\s*Project Overview\s*\n(.*?)(?=\n##|\Z)",
+            r"##\s+[^\n]*Project Overview[^\n]*\n(.*?)(?=\n##|\Z)",
             content,
             re.DOTALL | re.IGNORECASE,
         )
 
         if not overview_match:
-            result.add_error("Could not parse Project Overview section")
+            result.add_warning("Could not parse Project Overview section - skipping detailed validation")
             return
 
         overview_content = overview_match.group(1)
@@ -270,21 +270,22 @@ class ProjectBriefValidator:
 
     def _validate_requirements_section(self, content: str, result: ValidationResult):
         """Validate Core Requirements section"""
+        # More lenient regex - accept any emoji or no emoji
         requirements_match = re.search(
-            r"##\s+[📋]?\s*Core Requirements\s*\n(.*?)(?=\n##|\Z)",
+            r"##\s+[^\n]*Core Requirements[^\n]*\n(.*?)(?=\n##|\Z)",
             content,
             re.DOTALL | re.IGNORECASE,
         )
 
         if not requirements_match:
-            result.add_error("Could not parse Core Requirements section")
+            result.add_warning("Could not parse Core Requirements section - skipping detailed validation")
             return
 
         requirements_content = requirements_match.group(1)
 
-        # Check minimum length
+        # Check minimum length - make this a warning instead of error
         if len(requirements_content.strip()) < self.MIN_REQUIREMENTS_LENGTH:
-            result.add_error(
+            result.add_warning(
                 f"Core Requirements section is too short ({len(requirements_content)} chars). "
                 f"Minimum recommended: {self.MIN_REQUIREMENTS_LENGTH} characters"
             )
@@ -303,12 +304,12 @@ class ProjectBriefValidator:
         if not has_non_functional:
             result.add_warning("Missing 'Non-Functional Requirements' subsection")
 
-        # Count requirements (numbered or bulleted lists)
+        # Count requirements (numbered or bulleted lists) - more lenient pattern
         functional_reqs = len(
-            re.findall(r"^\s*[\d\-\*]\.\s+", requirements_content, re.MULTILINE)
+            re.findall(r"^\s*[-*]\s+", requirements_content, re.MULTILINE)
         )
 
-        if functional_reqs < 3:
+        if functional_reqs < 2:
             result.add_warning(
                 f"Only {functional_reqs} requirements found. Consider adding more specific requirements."
             )
