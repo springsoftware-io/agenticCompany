@@ -161,20 +161,22 @@ class SeedPlanter:
                 f"Failed: {str(e)}", 0
             )
             
-            raise# Note: We don't cleanup on failure - projects are permanent
+            raise  # Note: We don't cleanup on failure - projects are permanent
 
         return details
 
     def _sanitize_org_name(self, project_name: str) -> str:
-        """Convert project name to valid GitHub org name"""
+        """Convert project name to valid GitHub repo name with uniqueness"""
         # Convert to lowercase, replace spaces/special chars with hyphens
         org_name = re.sub(r'[^a-z0-9-]', '-', project_name.lower())
         # Remove consecutive hyphens
         org_name = re.sub(r'-+', '-', org_name)
         # Remove leading/trailing hyphens
         org_name = org_name.strip('-')
-        # Add timestamp suffix to ensure uniqueness
-        timestamp = datetime.utcnow().strftime('%y%m%d')
+        # Limit length to leave room for suffix
+        org_name = org_name[:50]
+        # Add timestamp with time (not just date) to ensure uniqueness
+        timestamp = datetime.utcnow().strftime('%y%m%d-%H%M%S')
         return f"{org_name}-{timestamp}"
 
     async def _create_github_repo(self, repo_name: str, description: str):
