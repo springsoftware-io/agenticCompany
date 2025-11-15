@@ -9,15 +9,15 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/product-agent.yml'
-      - '.github/workflows/specialized-agents.yml'
+      - '.github/workflows/core-product-agent.yml'
+      - '.github/workflows/core-specialized-agents.yml'
       - 'seedgpt-core/src/agents/product_agent.py'
       - 'seedgpt-core/src/agents/base_issue_agent.py'
 
   pull_request:
     paths:
-      - '.github/workflows/product-agent.yml'
-      - '.github/workflows/specialized-agents.yml'
+      - '.github/workflows/core-product-agent.yml'
+      - '.github/workflows/core-specialized-agents.yml'
       - 'seedgpt-core/src/agents/product_agent.py'
       - 'seedgpt-core/src/agents/base_issue_agent.py'
 
@@ -42,7 +42,7 @@ permissions:
 jobs:
   validate-on-change:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    uses: ./.github/workflows/specialized-agents.yml
+    uses: ./.github/workflows/core-specialized-agents.yml
     secrets: inherit
     with:
       agent: product
@@ -51,7 +51,7 @@ jobs:
 
   run-product-agent:
     if: github.event_name != 'pull_request' && github.event_name != 'push'
-    uses: ./.github/workflows/specialized-agents.yml
+    uses: ./.github/workflows/core-specialized-agents.yml
     secrets: inherit
     with:
       agent: product
