@@ -89,8 +89,8 @@ class UsageMetric(Base):
     prs_created = Column(Integer, default=0)
     api_calls = Column(Integer, default=0)
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)  # Additional usage details
+    # Additional data
+    extra_data = Column(JSON, nullable=True)  # Additional usage details
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -120,8 +120,8 @@ class Payment(Base):
     payment_type = Column(String, nullable=False)  # subscription, upgrade, overage
     description = Column(String, nullable=True)
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Additional data
+    extra_data = Column(JSON, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -148,8 +148,8 @@ class ConversionEvent(Base):
     trigger_reason = Column(String, nullable=True)  # quota_reached, upgrade_prompt, manual, etc.
     days_in_previous_tier = Column(Integer, nullable=True)
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Additional data
+    extra_data = Column(JSON, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -224,8 +224,8 @@ class Task(Base):
     # Expiration (tasks auto-delete after 1 hour)
     expires_at = Column(DateTime, nullable=False)
     
-    # Additional metadata
-    metadata = Column(JSON, nullable=True)
+    # Additional data
+    extra_data = Column(JSON, nullable=True)
 
 
 class TaskProgress(Base):
@@ -249,5 +249,5 @@ class TaskProgress(Base):
     # Timestamp
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
     
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Additional data
+    extra_data = Column(JSON, nullable=True)
