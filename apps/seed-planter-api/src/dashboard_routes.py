@@ -306,7 +306,7 @@ async def get_dashboard_metrics(
             Task.status == "completed",
             func.date(Task.completed_at) == today
         ).scalar() or 0
-        
+
         db_tasks_week = db.query(func.count(Task.id)).filter(
             Task.user_email == current_user.email,
             Task.status == "completed",
@@ -542,18 +542,18 @@ async def get_active_tasks(
 ):
     """
     Get all active project creation tasks for the current user
-    
+
     Shows real-time progress of ongoing project plantings
     """
     logger.info(f"📋 Active tasks request from: {current_user.email}")
-    
+
     try:
         # Get active tasks (not completed or failed)
         active_tasks = db.query(Task).filter(
             Task.user_email == current_user.email,
             Task.status.in_(["initializing", "in_progress", "creating_org", "forking_repo", "customizing", "deploying"])
         ).order_by(Task.created_at.desc()).all()
-        
+
         # Get today's completed and failed tasks
         today = datetime.utcnow().date()
         completed_today = db.query(func.count(Task.id)).filter(
@@ -561,13 +561,13 @@ async def get_active_tasks(
             Task.status == "completed",
             func.date(Task.completed_at) == today
         ).scalar() or 0
-        
+
         failed_today = db.query(func.count(Task.id)).filter(
             Task.user_email == current_user.email,
             Task.status == "failed",
             func.date(Task.failed_at) == today
         ).scalar() or 0
-        
+
         # Build response
         task_records = []
         for task in active_tasks:
@@ -583,17 +583,17 @@ async def get_active_tasks(
                 repo_url=task.repo_url,
                 deployment_url=task.deployment_url
             ))
-        
+
         response = ActiveTasksResponse(
             active_tasks=task_records,
             total_active=len(task_records),
             total_completed_today=completed_today,
             total_failed_today=failed_today
         )
-        
+
         logger.info(f"✅ Found {len(task_records)} active tasks for {current_user.email}")
         return response
-        
+
     except Exception as e:
         logger.error(f"❌ Error fetching active tasks: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch active tasks: {str(e)}")
