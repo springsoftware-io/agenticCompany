@@ -5,13 +5,16 @@
 - **Project**: magic-mirror-427812
 - **Region**: us-central1
 - **Connection Name**: `magic-mirror-427812:us-central1:seedgpt-db`
+- **Database**: seedgpt
+- **User**: seedgpt_user
+- **IP Address**: 34.56.111.107
 
 ## Configuration
 
 ### Production (Cloud Run)
-Cloud Run automatically connects via Unix socket. Use this DATABASE_URL:
+Cloud Run automatically connects via Unix socket. The DATABASE_URL is stored in Secret Manager and automatically injected:
 ```
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@/seedgpt?host=/cloudsql/magic-mirror-427812:us-central1:seedgpt-db
+DATABASE_URL=postgresql+psycopg2://seedgpt_user:uj71RVRWZPckYucBYCK7edfyQ@/seedgpt?host=/cloudsql/magic-mirror-427812:us-central1:seedgpt-db
 ```
 
 ### Local Development with Cloud SQL Proxy
@@ -27,9 +30,9 @@ DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@/seedgpt?host=/cloudsql/magic-m
    ./cloud-sql-proxy magic-mirror-427812:us-central1:seedgpt-db
    ```
 
-3. **Use this DATABASE_URL**:
+3. **Use this DATABASE_URL in your local .env**:
    ```
-   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/seedgpt
+   DATABASE_URL=postgresql://seedgpt_user:uj71RVRWZPckYucBYCK7edfyQ@localhost:5432/seedgpt
    ```
 
 ## Database Migrations
