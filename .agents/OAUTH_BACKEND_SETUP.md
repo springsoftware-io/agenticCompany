@@ -2,18 +2,18 @@
 
 ## Overview
 
-The OAuth flow is now fully integrated with the seed-planter-api backend. Users can authenticate with GitHub and automatically fork the SeedGPT repository.
+The OAuth flow is now fully integrated with the agenticCompany backend. Users can authenticate with GitHub and automatically fork the SeedGPT repository.
 
 ## Architecture
 
 ```
-User Browser → GitHub OAuth → oauth-callback.html → seed-planter-api → GitHub API
+User Browser → GitHub OAuth → oauth-callback.html → agenticCompany → GitHub API
                                                     (/api/v1/oauth/exchange)
 ```
 
 ## Changes Made
 
-### 1. Backend API (`apps/seed-planter-api`)
+### 1. Backend API (`apps/agenticCompany`)
 
 **New Endpoint**: `POST /api/v1/oauth/exchange`
 - Accepts OAuth authorization code
@@ -28,13 +28,13 @@ User Browser → GitHub OAuth → oauth-callback.html → seed-planter-api → G
 ### 2. Frontend (`docs/`)
 
 **Files Modified**:
-- `oauth-callback.html`: Updated `OAUTH_PROXY_URL` to point to seed-planter-api
+- `oauth-callback.html`: Updated `OAUTH_PROXY_URL` to point to agenticCompany
 - `guided-setup.html`: Restored OAuth option as "AUTOMATED"
 
 ### 3. Deployment
 
 **Files Modified**:
-- `.github/workflows/apps-seed-planter-api.yml`: Added `GITHUB_OAUTH_CLIENT_SECRET` secret mount
+- `.github/workflows/apps-agenticCompany.yml`: Added `GITHUB_OAUTH_CLIENT_SECRET` secret mount
 
 **New Script**:
 - `.agents/scripts/add_oauth_secret.sh`: Helper script to add secret to GCP
@@ -64,7 +64,7 @@ echo -n "YOUR_CLIENT_SECRET" | gcloud secrets create GITHUB_OAUTH_CLIENT_SECRET 
 
 ### Step 2: Deploy Updated API
 
-The workflow will automatically deploy when you push changes to `apps/seed-planter-api/`:
+The workflow will automatically deploy when you push changes to `apps/agenticCompany/`:
 
 ```bash
 git add .
@@ -130,7 +130,7 @@ Or manually trigger:
 # Get an authorization code from GitHub OAuth flow first
 # Then test the exchange:
 
-curl -X POST https://seed-planter-api-pmxej6pldq-uc.a.run.app/api/v1/oauth/exchange \
+curl -X POST https://agenticCompany-pmxej6pldq-uc.a.run.app/api/v1/oauth/exchange \
   -H "Content-Type: application/json" \
   -d '{"code":"YOUR_AUTH_CODE"}'
 ```
@@ -175,7 +175,7 @@ allow_origins=["*"]  # Or specific origins
 
 ## Related Files
 
-- Backend: `apps/seed-planter-api/src/main.py`
+- Backend: `apps/agenticCompany/src/main.py`
 - Frontend: `docs/oauth-callback.html`, `docs/guided-setup.html`
-- Workflow: `.github/workflows/apps-seed-planter-api.yml`
+- Workflow: `.github/workflows/apps-agenticCompany.yml`
 - Script: `.agents/scripts/add_oauth_secret.sh`

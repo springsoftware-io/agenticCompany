@@ -10,9 +10,9 @@ echo "============================================"
 
 # Get secrets from GitHub
 echo "📥 Fetching secrets from GitHub..."
-PAT_TOKEN=$(gh secret list --repo roeiba/SeedGPT | grep PAT_TOKEN | awk '{print $1}')
-ANTHROPIC_KEY=$(gh secret list --repo roeiba/SeedGPT | grep ANTHROPIC_API_KEY | awk '{print $1}')
-GCP_CREDS=$(gh secret list --repo roeiba/SeedGPT | grep GCP_CREDENTIALS | awk '{print $1}')
+PAT_TOKEN=$(gh secret list --repo springsoftware-io/agenticCompany | grep PAT_TOKEN | awk '{print $1}')
+ANTHROPIC_KEY=$(gh secret list --repo springsoftware-io/agenticCompany | grep ANTHROPIC_API_KEY | awk '{print $1}')
+GCP_CREDS=$(gh secret list --repo springsoftware-io/agenticCompany | grep GCP_CREDENTIALS | awk '{print $1}')
 
 if [ -z "$PAT_TOKEN" ] || [ -z "$ANTHROPIC_KEY" ] || [ -z "$GCP_CREDS" ]; then
     echo "❌ Error: Not all secrets found in GitHub"
@@ -31,7 +31,7 @@ echo "Creating secrets in GCP Secret Manager..."
 echo "1. PAT_TOKEN..."
 if gcloud secrets describe PAT_TOKEN --project=$PROJECT_ID &>/dev/null; then
     echo "   Already exists - updating..."
-    gh secret get PAT_TOKEN --repo roeiba/SeedGPT 2>/dev/null || echo "Cannot read GitHub secret directly"
+    gh secret get PAT_TOKEN --repo springsoftware-io/agenticCompany 2>/dev/null || echo "Cannot read GitHub secret directly"
 else
     echo "   Please provide your GitHub PAT token:"
     read -s PAT_VALUE
@@ -59,9 +59,9 @@ echo "3. GCP_CREDENTIALS..."
 if gcloud secrets describe GCP_CREDENTIALS --project=$PROJECT_ID &>/dev/null; then
     echo "   Already exists"
 else
-    if [ -f "./apps/seed-planter-api/gcp-credentials.json" ]; then
+    if [ -f "./apps/agenticCompany/gcp-credentials.json" ]; then
         gcloud secrets create GCP_CREDENTIALS \
-            --data-file=./apps/seed-planter-api/gcp-credentials.json \
+            --data-file=./apps/agenticCompany/gcp-credentials.json \
             --project=$PROJECT_ID
         echo "   ✅ Created from local file"
     else

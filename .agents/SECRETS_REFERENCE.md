@@ -6,13 +6,13 @@
 
 | Secret Name | Purpose | Used By | Status |
 |------------|---------|---------|--------|
-| `AUTH0_DOMAIN` | Auth0 tenant domain | seed-planter-api | ✅ Configured (placeholder) |
-| `AUTH0_CLIENT_ID` | Auth0 application client ID | seed-planter-api | ✅ Configured (placeholder) |
-| `AUTH0_CLIENT_SECRET` | Auth0 application client secret | seed-planter-api | ✅ Configured (placeholder) |
-| `AUTH0_AUDIENCE` | Auth0 API audience | seed-planter-api | ✅ Configured (placeholder) |
-| `DATABASE_URL` | PostgreSQL connection string | seed-planter-api | ✅ Configured |
-| `GCP_CREDENTIALS` | GCP service account JSON | seed-planter-api | ✅ Configured |
-| `GITHUB_OAUTH_CLIENT_SECRET` | GitHub OAuth app secret | seed-planter-api | ✅ Configured |
+| `AUTH0_DOMAIN` | Auth0 tenant domain | agenticCompany | ✅ Configured (placeholder) |
+| `AUTH0_CLIENT_ID` | Auth0 application client ID | agenticCompany | ✅ Configured (placeholder) |
+| `AUTH0_CLIENT_SECRET` | Auth0 application client secret | agenticCompany | ✅ Configured (placeholder) |
+| `AUTH0_AUDIENCE` | Auth0 API audience | agenticCompany | ✅ Configured (placeholder) |
+| `DATABASE_URL` | PostgreSQL connection string | agenticCompany | ✅ Configured |
+| `GCP_CREDENTIALS` | GCP service account JSON | agenticCompany | ✅ Configured |
+| `GITHUB_OAUTH_CLIENT_SECRET` | GitHub OAuth app secret | agenticCompany | ✅ Configured |
 
 ### Quick Commands
 
@@ -35,7 +35,7 @@ echo -n "new_value" | gcloud secrets versions add SECRET_NAME \
 
 #### View Cloud Run secrets configuration
 ```bash
-gcloud run services describe seed-planter-api \
+gcloud run services describe agenticCompany \
   --region=us-central1 \
   --project=magic-mirror-427812 \
   --format="yaml(spec.template.spec.containers[0].env)"
@@ -66,13 +66,13 @@ echo -n "$AUTH0_AUDIENCE" | gcloud secrets versions add AUTH0_AUDIENCE --data-fi
 ### Deployment
 
 Secrets are automatically injected during deployment via GitHub Actions workflow:
-- File: `.github/workflows/apps-seed-planter-api.yml`
+- File: `.github/workflows/apps-agenticCompany.yml`
 - Line: `--update-secrets` parameter includes all Auth0 secrets
 
 Manual deployment with secrets:
 ```bash
-gcloud run deploy seed-planter-api \
-  --image gcr.io/magic-mirror-427812/seed-planter-api:latest \
+gcloud run deploy agenticCompany \
+  --image gcr.io/magic-mirror-427812/agenticCompany:latest \
   --region us-central1 \
   --project magic-mirror-427812 \
   --update-secrets="AUTH0_DOMAIN=AUTH0_DOMAIN:latest,AUTH0_CLIENT_ID=AUTH0_CLIENT_ID:latest,AUTH0_CLIENT_SECRET=AUTH0_CLIENT_SECRET:latest,AUTH0_AUDIENCE=AUTH0_AUDIENCE:latest"
@@ -93,13 +93,13 @@ gcloud run deploy seed-planter-api \
 Check if secrets are loaded correctly:
 ```bash
 # View Cloud Run logs
-gcloud run services logs read seed-planter-api \
+gcloud run services logs read agenticCompany \
   --region=us-central1 \
   --project=magic-mirror-427812 \
   --limit=50
 
 # Check for Auth0 configuration errors
-gcloud run services logs read seed-planter-api \
+gcloud run services logs read agenticCompany \
   --region=us-central1 \
   --project=magic-mirror-427812 \
   --limit=50 | grep -i auth0

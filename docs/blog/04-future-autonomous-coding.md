@@ -421,7 +421,7 @@ What will you build?
 
 ## Join the Future
 
-Start building with autonomous AI agents today: **[SeedGPT](https://github.com/roeiba/SeedGPT)** - the open-source project demonstrating these principles in action.
+Start building with autonomous AI agents today: **[SeedGPT](https://github.com/springsoftware-io/agenticCompany)** - the open-source project demonstrating these principles in action.
 
 ---
 

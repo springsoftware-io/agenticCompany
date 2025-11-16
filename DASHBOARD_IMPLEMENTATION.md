@@ -16,7 +16,7 @@ Successfully implemented a comprehensive real-time project progress dashboard wi
 
 ## What Was Built
 
-### 1. Backend API (`apps/seed-planter-api/`)
+### 1. Backend API (`apps/agenticCompany/`)
 
 #### New Files Created
 
@@ -487,7 +487,7 @@ VITE_API_URL=https://api.seedgpt.com
 ### Build Commands
 ```bash
 # Backend
-cd apps/seed-planter-api
+cd apps/agenticCompany
 pip install -r requirements.txt
 uvicorn src.main:app --host 0.0.0.0 --port 8080
 
@@ -505,7 +505,7 @@ Both services have existing Dockerfiles and CI/CD workflows configured for Googl
 
 ## Documentation Links
 
-- [Dashboard API Documentation](apps/seed-planter-api/DASHBOARD_API.md)
+- [Dashboard API Documentation](apps/agenticCompany/DASHBOARD_API.md)
 - [Dashboard Features Guide](apps/seed-planter-frontend/DASHBOARD_FEATURES.md)
 - [Main README](README.md)
 - [Contributing Guide](CONTRIBUTING.md)
@@ -558,6 +558,6 @@ The dashboard implementation successfully addresses Issue #91 by providing compr
 
 **Implemented by**: Claude (Anthropic AI)
 **Project**: SeedGPT
-**Repository**: https://github.com/roeiba/SeedGPT
+**Repository**: https://github.com/springsoftware-io/agenticCompany
 **Issue**: #91 - Add real-time project progress dashboard
 **Date**: November 16, 2025

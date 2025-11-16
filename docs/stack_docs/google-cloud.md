@@ -171,7 +171,7 @@ gcloud run services logs read SERVICE_NAME --limit 50
 ```bash
 GCP_PROJECT_ID=magic-mirror-427812
 REGION=us-central1
-SERVICE_NAME=seed-planter-api
+SERVICE_NAME=agenticCompany
 REGISTRY=gcr.io
 ```
 

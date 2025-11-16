@@ -72,7 +72,7 @@ gcloud secrets versions list AUTH0_CLIENT_SECRET --project=magic-mirror-427812
 gcloud secrets versions list AUTH0_AUDIENCE --project=magic-mirror-427812
 
 # Check Cloud Run service configuration
-gcloud run services describe seed-planter-api \
+gcloud run services describe agenticCompany \
   --region=us-central1 \
   --project=magic-mirror-427812 \
   --format="value(spec.template.spec.containers[0].env)"
@@ -108,14 +108,14 @@ After updating secrets, test the authentication:
 # Get a test token from Auth0 (you'll need to implement OAuth flow in frontend)
 # Then test with the API:
 
-curl -X GET https://seed-planter-api-1068119864554.us-central1.run.app/api/v1/auth/me \
+curl -X GET https://agenticCompany-1068119864554.us-central1.run.app/api/v1/auth/me \
   -H "Authorization: Bearer YOUR_AUTH0_JWT_TOKEN"
 ```
 
 ## Troubleshooting
 
 ### Secrets not loading
-- Check Cloud Run logs: `gcloud run services logs read seed-planter-api --region=us-central1 --project=magic-mirror-427812`
+- Check Cloud Run logs: `gcloud run services logs read agenticCompany --region=us-central1 --project=magic-mirror-427812`
 - Verify secrets exist: `gcloud secrets list --project=magic-mirror-427812`
 - Check IAM permissions: Cloud Run service account needs `roles/secretmanager.secretAccessor`
 

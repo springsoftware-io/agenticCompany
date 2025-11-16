@@ -8,16 +8,16 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
 fi
 
 echo ""
-echo "Setting secret in repository: roeiba/seedgpt"
+echo "Setting secret in repository: springsoftware-io/agenticCompany"
 
 # Set the secret using gh CLI
-echo "$ANTHROPIC_API_KEY" | gh secret set ANTHROPIC_API_KEY --repo roeiba/seedgpt
+echo "$ANTHROPIC_API_KEY" | gh secret set ANTHROPIC_API_KEY --repo springsoftware-io/agenticCompany
 
 if [ $? -eq 0 ]; then
     echo "✅ ANTHROPIC_API_KEY secret set successfully!"
     echo ""
     echo "You can verify it at:"
-    echo "https://github.com/roeiba/seedgpt/settings/secrets/actions"
+    echo "https://github.com/springsoftware-io/agenticCompany/settings/secrets/actions"
 else
     echo "❌ Failed to set secret"
     exit 1

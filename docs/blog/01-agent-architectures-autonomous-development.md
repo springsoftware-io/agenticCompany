@@ -156,7 +156,7 @@ In the next article, we'll examine how these agents can go beyond executing pred
 
 ## Try It Yourself
 
-See autonomous AI agents in action with **[SeedGPT](https://github.com/roeiba/SeedGPT)** - an open-source project that builds itself using the architectural patterns described in this article.
+See autonomous AI agents in action with **[SeedGPT](https://github.com/springsoftware-io/agenticCompany)** - an open-source project that builds itself using the architectural patterns described in this article.
 
 ---
 

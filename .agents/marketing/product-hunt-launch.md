@@ -187,7 +187,7 @@ autonomous dev team?
 **[1:20-1:30] Call to Action**
 - Visual: SeedGPT website with live examples
 - Text: "Try it free with your credentials"
-- Text: "github.com/roeiba/SeedGPT"
+- Text: "github.com/springsoftware-io/agenticCompany"
 - Voiceover: "Start building while you sleep. Try SeedGPT today."
 
 ### Video Production Notes
@@ -414,13 +414,13 @@ Would self-hosted work for you, or do you prefer managed?
 Absolutely! Here's the quickest path:
 
 **5-Minute Quick Start:**
-1. Clone: `git clone https://github.com/roeiba/SeedGPT`
+1. Clone: `git clone https://github.com/springsoftware-io/agenticCompany`
 2. Add your GitHub token and Claude API key to secrets
 3. Enable GitHub Actions
 4. Watch your first AI-generated issue appear!
 
 **Full Setup Guide:**
-https://github.com/roeiba/SeedGPT#-getting-started
+https://github.com/springsoftware-io/agenticCompany#-getting-started
 
 **Live Examples:**
 https://roeiba.github.io/SeedGPT/ - See real projects built with SeedGPT

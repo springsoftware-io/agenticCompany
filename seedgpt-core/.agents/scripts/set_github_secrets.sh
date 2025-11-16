@@ -5,7 +5,7 @@
 
 set -e
 
-REPO="${1:-roeiba/seedgpt}"
+REPO="${1:-springsoftware-io/agenticCompany}"
 
 echo "🔐 Setting GitHub Secrets for repository: $REPO"
 echo ""

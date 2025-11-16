@@ -374,7 +374,7 @@ In our final article, we'll look beyond current capabilities to explore the futu
 
 ## Try It Yourself
 
-See autonomous CI/CD in action with **[SeedGPT](https://github.com/roeiba/SeedGPT)** - agents that generate issues, write code, create PRs, and deploy to production automatically.
+See autonomous CI/CD in action with **[SeedGPT](https://github.com/springsoftware-io/agenticCompany)** - agents that generate issues, write code, create PRs, and deploy to production automatically.
 
 ---
 

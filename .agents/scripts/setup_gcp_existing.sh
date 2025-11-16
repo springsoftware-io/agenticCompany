@@ -10,7 +10,7 @@ echo "=========================================="
 PROJECT_ID="magic-mirror-427812"  # Your current active project
 SERVICE_ACCOUNT_NAME="seedgpt-planter"
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
-KEY_FILE="./apps/seed-planter-api/gcp-credentials.json"
+KEY_FILE="./apps/agenticCompany/gcp-credentials.json"
 
 echo "Using existing project: ${PROJECT_ID}"
 
@@ -74,10 +74,10 @@ echo "✅ Key created at ${KEY_FILE}"
 # Step 5: Update .env file
 echo ""
 echo "📝 Step 5: Updating .env file..."
-ENV_FILE="./apps/seed-planter-api/.env"
+ENV_FILE="./apps/agenticCompany/.env"
 
 if [ ! -f "${ENV_FILE}" ]; then
-    cp ./apps/seed-planter-api/.env.example ${ENV_FILE}
+    cp ./apps/agenticCompany/.env.example ${ENV_FILE}
 fi
 
 # Update GCP settings
@@ -90,10 +90,10 @@ echo "✅ .env file updated"
 # Step 6: Add to .gitignore
 echo ""
 echo "🔒 Step 6: Securing credentials..."
-if ! grep -q "gcp-credentials.json" ./apps/seed-planter-api/.gitignore; then
-    echo "" >> ./apps/seed-planter-api/.gitignore
-    echo "# GCP Credentials" >> ./apps/seed-planter-api/.gitignore
-    echo "gcp-credentials.json" >> ./apps/seed-planter-api/.gitignore
+if ! grep -q "gcp-credentials.json" ./apps/agenticCompany/.gitignore; then
+    echo "" >> ./apps/agenticCompany/.gitignore
+    echo "# GCP Credentials" >> ./apps/agenticCompany/.gitignore
+    echo "gcp-credentials.json" >> ./apps/agenticCompany/.gitignore
 fi
 echo "✅ Secured"
 
@@ -111,5 +111,5 @@ echo ""
 echo "🔐 GitHub Secret (run this):"
 echo "  cat ${KEY_FILE} | pbcopy"
 echo "  Then create secret 'GCP_CREDENTIALS' at:"
-echo "  https://github.com/roeiba/SeedGPT/settings/secrets/actions"
+echo "  https://github.com/springsoftware-io/agenticCompany/settings/secrets/actions"
 echo ""

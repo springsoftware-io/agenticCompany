@@ -271,7 +271,7 @@ In our next article, we'll examine how these autonomous, self-improving agents i
 
 ## Try It Yourself
 
-Experience self-improving AI agents in action with **[SeedGPT](https://github.com/roeiba/SeedGPT)** - watch how agents learn from their own pull requests to generate better code over time.
+Experience self-improving AI agents in action with **[SeedGPT](https://github.com/springsoftware-io/agenticCompany)** - watch how agents learn from their own pull requests to generate better code over time.
 
 ---
 

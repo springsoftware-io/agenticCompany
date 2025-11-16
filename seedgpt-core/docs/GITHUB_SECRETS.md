@@ -163,7 +163,7 @@ cd /path/to/seedGPT
 ./.agents/scripts/set_github_secrets.sh
 
 # Output:
-# 🔐 Setting GitHub Secrets for repository: roeiba/seedGPT
+# 🔐 Setting GitHub Secrets for repository: springsoftware-io/agenticCompany
 # 
 # 📦 Setting Gemini secrets...
 # ✅ Set GEMINI_API_KEY
@@ -179,9 +179,9 @@ cd /path/to/seedGPT
 
 ```bash
 # Set individual secrets
-echo "your-api-key" | gh secret set GEMINI_API_KEY --repo roeiba/seedGPT
-echo "your-project-id" | gh secret set GOOGLE_CLOUD_PROJECT --repo roeiba/seedGPT
-echo "your-api-key" | gh secret set ANTHROPIC_API_KEY --repo roeiba/seedGPT
+echo "your-api-key" | gh secret set GEMINI_API_KEY --repo springsoftware-io/agenticCompany
+echo "your-project-id" | gh secret set GOOGLE_CLOUD_PROJECT --repo springsoftware-io/agenticCompany
+echo "your-api-key" | gh secret set ANTHROPIC_API_KEY --repo springsoftware-io/agenticCompany
 ```
 
 ### Method 3: Via GitHub Web UI
@@ -197,7 +197,7 @@ echo "your-api-key" | gh secret set ANTHROPIC_API_KEY --repo roeiba/seedGPT
 ### List All Secrets
 
 ```bash
-gh secret list --repo roeiba/seedGPT
+gh secret list --repo springsoftware-io/agenticCompany
 ```
 
 Output:
@@ -234,14 +234,14 @@ vim src/claude-agent/.env
 
 ```bash
 # Update individual secret
-echo "new-api-key" | gh secret set GEMINI_API_KEY --repo roeiba/seedGPT
+echo "new-api-key" | gh secret set GEMINI_API_KEY --repo springsoftware-io/agenticCompany
 ```
 
 ## 🗑️ Removing Secrets
 
 ```bash
 # Remove a secret
-gh secret remove GEMINI_API_KEY --repo roeiba/seedGPT
+gh secret remove GEMINI_API_KEY --repo springsoftware-io/agenticCompany
 ```
 
 ## 🔒 Security Best Practices
@@ -314,10 +314,10 @@ steps:
 **Solution**:
 ```bash
 # Verify secret exists
-gh secret list --repo roeiba/seedGPT
+gh secret list --repo springsoftware-io/agenticCompany
 
 # If missing, set it
-echo "your-key" | gh secret set SECRET_NAME --repo roeiba/seedGPT
+echo "your-key" | gh secret set SECRET_NAME --repo springsoftware-io/agenticCompany
 ```
 
 ### Authentication Failed
@@ -388,5 +388,5 @@ Before running CI/CD workflows:
 ---
 
 **Last Updated**: November 15, 2025  
-**Repository**: roeiba/seedGPT  
+**Repository**: springsoftware-io/agenticCompany  
 **Status**: ⚠️ Requires GCP_CREDENTIALS and PAT_TOKEN for Seed Planter API deployment

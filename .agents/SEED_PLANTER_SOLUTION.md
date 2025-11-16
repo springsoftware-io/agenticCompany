@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the professional implementation of the **Seed Planter** platform for SeedGPT, addressing [Issue #69](https://github.com/roeiba/SeedGPT/issues/69).
+This document describes the professional implementation of the **Seed Planter** platform for SeedGPT, addressing [Issue #69](https://github.com/springsoftware-io/agenticCompany/issues/69).
 
 ## Concept: From Sandbox to Seed Planter
 
@@ -52,7 +52,7 @@ Step 1: Create GitHub Organization (10%)
   └─ Add "seedgpt-project" label
 
 Step 2: Fork SeedGPT Template (25%)
-  ├─ Clone roeiba/SeedGPT repository
+  ├─ Clone springsoftware-io/agenticCompany repository
   ├─ Create new repo in organization
   └─ Push template code
 
@@ -106,7 +106,7 @@ At any time, users can:
 
 ### Backend (Seed Planter API)
 
-**Location**: `/apps/seed-planter-api/`
+**Location**: `/apps/agenticCompany/`
 
 **Core Files**:
 - `src/seed_planter.py` - Main planting logic
@@ -244,7 +244,7 @@ Transfer project ownership to user.
 # GitHub (SeedGPT's account)
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
 GITHUB_USERNAME=roeiba
-SEEDGPT_TEMPLATE_REPO=roeiba/SeedGPT
+SEEDGPT_TEMPLATE_REPO=springsoftware-io/agenticCompany
 
 # Anthropic
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxx
@@ -273,7 +273,7 @@ MAX_INSTANCES=10
 
 1. **Configure Backend**:
    ```bash
-   cd apps/seed-planter-api
+   cd apps/agenticCompany
    cp .env.example .env
    # Edit .env with your credentials
    python3 -m venv venv
@@ -408,6 +408,6 @@ The platform reduces friction in the conversion funnel while providing immediate
 ---
 
 **Related Files**:
-- Backend: `/apps/seed-planter-api/`
+- Backend: `/apps/agenticCompany/`
 - Frontend: `/apps/seed-planter-frontend/`
-- Issue: [#69](https://github.com/roeiba/SeedGPT/issues/69)
+- Issue: [#69](https://github.com/springsoftware-io/agenticCompany/issues/69)

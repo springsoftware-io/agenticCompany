@@ -77,24 +77,24 @@ Check the GitHub Actions run to ensure:
 ## Files Modified
 
 **Backend Code**:
-- `apps/seed-planter-api/src/database.py`
-- `apps/seed-planter-api/src/auth.py`
-- `apps/seed-planter-api/src/auth_routes.py`
-- `apps/seed-planter-api/src/billing_routes.py`
-- `apps/seed-planter-api/src/billing_service.py`
-- `apps/seed-planter-api/src/db_models.py`
-- `apps/seed-planter-api/src/usage_metering.py`
-- `apps/seed-planter-api/src/config.py`
-- `apps/seed-planter-api/src/main.py`
-- `apps/seed-planter-api/requirements.txt`
+- `apps/agenticCompany/src/database.py`
+- `apps/agenticCompany/src/auth.py`
+- `apps/agenticCompany/src/auth_routes.py`
+- `apps/agenticCompany/src/billing_routes.py`
+- `apps/agenticCompany/src/billing_service.py`
+- `apps/agenticCompany/src/db_models.py`
+- `apps/agenticCompany/src/usage_metering.py`
+- `apps/agenticCompany/src/config.py`
+- `apps/agenticCompany/src/main.py`
+- `apps/agenticCompany/requirements.txt`
 
 **Infrastructure**:
-- `.github/workflows/apps-seed-planter-api.yml`
+- `.github/workflows/apps-agenticCompany.yml`
 
 **Scripts & Docs**:
 - `.agents/scripts/setup_cloud_sql.sh` (new)
 - `.agents/scripts/test_imports.sh` (new)
-- `apps/seed-planter-api/.agents/DATABASE_SETUP.md` (new)
+- `apps/agenticCompany/.agents/DATABASE_SETUP.md` (new)
 
 ## Commits
 

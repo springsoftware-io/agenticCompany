@@ -346,7 +346,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/seed-planter-api/**'
+      - 'apps/agenticCompany/**'
 
 jobs:
   test:

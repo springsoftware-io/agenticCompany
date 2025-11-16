@@ -21,23 +21,23 @@ This implementation adds a comprehensive freemium pricing system to SeedGPT with
 #### New Files Created:
 
 **Database Layer**:
-- `apps/seed-planter-api/src/database.py` - SQLAlchemy database configuration
-- `apps/seed-planter-api/src/db_models.py` - Database models (User, Subscription, UsageMetric, Payment, ConversionEvent, PricingConfig)
+- `apps/agenticCompany/src/database.py` - SQLAlchemy database configuration
+- `apps/agenticCompany/src/db_models.py` - Database models (User, Subscription, UsageMetric, Payment, ConversionEvent, PricingConfig)
 
 **Authentication**:
-- `apps/seed-planter-api/src/auth.py` - JWT authentication and password hashing
-- `apps/seed-planter-api/src/auth_models.py` - Pydantic models for auth
-- `apps/seed-planter-api/src/auth_routes.py` - Registration and login endpoints
+- `apps/agenticCompany/src/auth.py` - JWT authentication and password hashing
+- `apps/agenticCompany/src/auth_models.py` - Pydantic models for auth
+- `apps/agenticCompany/src/auth_routes.py` - Registration and login endpoints
 
 **Billing & Metering**:
-- `apps/seed-planter-api/src/usage_metering.py` - Usage tracking and quota enforcement
-- `apps/seed-planter-api/src/billing_service.py` - Subscription management and Stripe integration
-- `apps/seed-planter-api/src/billing_routes.py` - Billing API endpoints
+- `apps/agenticCompany/src/usage_metering.py` - Usage tracking and quota enforcement
+- `apps/agenticCompany/src/billing_service.py` - Subscription management and Stripe integration
+- `apps/agenticCompany/src/billing_routes.py` - Billing API endpoints
 
 **Modified Files**:
-- `apps/seed-planter-api/src/main.py` - Integrated new routes, authentication, and usage metering
-- `apps/seed-planter-api/src/config.py` - Added database, auth, and Stripe configuration
-- `apps/seed-planter-api/requirements.txt` - Added SQLAlchemy, passlib, python-jose, stripe
+- `apps/agenticCompany/src/main.py` - Integrated new routes, authentication, and usage metering
+- `apps/agenticCompany/src/config.py` - Added database, auth, and Stripe configuration
+- `apps/agenticCompany/requirements.txt` - Added SQLAlchemy, passlib, python-jose, stripe
 
 ### 3. Frontend Components
 
@@ -283,9 +283,9 @@ function Dashboard() {
 - Configuration: 2 files
 
 ### Modified Files (3):
-- `apps/seed-planter-api/src/main.py`
-- `apps/seed-planter-api/src/config.py`
-- `apps/seed-planter-api/requirements.txt`
+- `apps/agenticCompany/src/main.py`
+- `apps/agenticCompany/src/config.py`
+- `apps/agenticCompany/requirements.txt`
 
 ## Success Criteria Met ✅
 

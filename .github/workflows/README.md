@@ -24,7 +24,7 @@ These workflows provide the core SeedGPT functionality:
 **NOT planted (deleted during planting)**
 
 CI/CD workflows for the SeedGPT template applications:
-- `apps-seed-planter-api.yml` - Seed Planter API backend
+- `apps-agenticCompany.yml` - Seed Planter API backend
 - `apps-seed-planter-frontend.yml` - Seed Planter Frontend
 
 These reference the `apps/` folder which is removed when planting new projects.

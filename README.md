@@ -3,7 +3,7 @@
 > **Your project that codes itself.**  
 > Describe what you want. AI builds it. Forever.
 
-[![GitHub stars](https://img.shields.io/github/stars/roeiba/seedGPT?style=social)](https://github.com/roeiba/seedGPT)
+[![GitHub stars](https://img.shields.io/github/stars/springsoftware-io/agenticCompany?style=social)](https://github.com/springsoftware-io/agenticCompany)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
@@ -167,8 +167,8 @@ Your SeedGPT instance is yours to customize:
 
 ## Need help?
 
-- **Questions?** Open a [Discussion](https://github.com/roeiba/seedGPT/discussions)
-- **Found a bug?** Open an [Issue](https://github.com/roeiba/seedGPT/issues)
+- **Questions?** Open a [Discussion](https://github.com/springsoftware-io/agenticCompany/discussions)
+- **Found a bug?** Open an [Issue](https://github.com/springsoftware-io/agenticCompany/issues)
 - **Want to contribute?** See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
@@ -179,4 +179,4 @@ MIT - use it however you want.
 
 **Built something cool?** Star the repo and share your project!
 
-[⭐ Star](https://github.com/roeiba/seedGPT) · [Report Issue](https://github.com/roeiba/seedGPT/issues) · [Discussions](https://github.com/roeiba/seedGPT/discussions)
+[⭐ Star](https://github.com/springsoftware-io/agenticCompany) · [Report Issue](https://github.com/springsoftware-io/agenticCompany/issues) · [Discussions](https://github.com/springsoftware-io/agenticCompany/discussions)

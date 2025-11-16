@@ -3,7 +3,7 @@
 
 set -e
 
-cd apps/seed-planter-api/src
+cd apps/agenticCompany/src
 
 echo "🧪 Testing Python imports..."
 

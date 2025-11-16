@@ -191,7 +191,7 @@ Track these metrics to measure impact:
 ## Credits
 
 **Written by:** SeedGPT AI Agents (with human oversight)
-**Project:** https://github.com/roeiba/SeedGPT
+**Project:** https://github.com/springsoftware-io/agenticCompany
 **Contact:** [Your contact information]
 **License:** CC BY 4.0 (Creative Commons Attribution)
 
@@ -200,9 +200,9 @@ Track these metrics to measure impact:
 ## Contributing
 
 Found an error or have a suggestion?
-- Open an issue: https://github.com/roeiba/SeedGPT/issues
-- Submit a PR: https://github.com/roeiba/SeedGPT/pulls
+- Open an issue: https://github.com/springsoftware-io/agenticCompany/issues
+- Submit a PR: https://github.com/springsoftware-io/agenticCompany/pulls
 
 ---
 
-**Ready to build with autonomous AI agents?** Star the [SeedGPT repository](https://github.com/roeiba/SeedGPT) and join the autonomous development revolution.
+**Ready to build with autonomous AI agents?** Star the [SeedGPT repository](https://github.com/springsoftware-io/agenticCompany) and join the autonomous development revolution.

@@ -245,7 +245,7 @@ version: '3.8'
 services:
   api:
     build:
-      context: ./apps/seed-planter-api
+      context: ./apps/agenticCompany
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -255,7 +255,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./apps/seed-planter-api:/app
+      - ./apps/agenticCompany:/app
     restart: unless-stopped
 
   frontend:

@@ -33,7 +33,7 @@ SeedGPT now includes a 3-tier pricing model:
 
 ### Backend Components
 
-#### Database Models (`apps/seed-planter-api/src/db_models.py`)
+#### Database Models (`apps/agenticCompany/src/db_models.py`)
 - **User**: User account information
 - **Subscription**: Tier, limits, Stripe integration
 - **UsageMetric**: Monthly usage tracking
@@ -43,7 +43,7 @@ SeedGPT now includes a 3-tier pricing model:
 
 #### Services
 
-**UsageMeteringService** (`apps/seed-planter-api/src/usage_metering.py`)
+**UsageMeteringService** (`apps/agenticCompany/src/usage_metering.py`)
 - `get_usage_stats()`: Current usage and limits
 - `check_quota()`: Check if operation is allowed
 - `enforce_quota()`: Raise exception if quota exceeded
@@ -51,7 +51,7 @@ SeedGPT now includes a 3-tier pricing model:
 - `track_conversion_event()`: Log tier changes
 - `get_conversion_metrics()`: Analytics dashboard data
 
-**BillingService** (`apps/seed-planter-api/src/billing_service.py`)
+**BillingService** (`apps/agenticCompany/src/billing_service.py`)
 - `create_free_subscription()`: Initialize new users
 - `create_checkout_session()`: Stripe checkout for upgrades
 - `handle_subscription_created()`: Process Stripe webhooks
@@ -113,7 +113,7 @@ SeedGPT now includes a 3-tier pricing model:
 
 ### 1. Environment Configuration
 
-Update `.env` file in `apps/seed-planter-api/`:
+Update `.env` file in `apps/agenticCompany/`:
 
 ```bash
 # Database (use PostgreSQL in production)
@@ -139,7 +139,7 @@ STRIPE_ENTERPRISE_PRICE_ID=price_...
 Initialize the database:
 
 ```bash
-cd apps/seed-planter-api
+cd apps/agenticCompany
 python -c "from src.database import init_db; init_db()"
 ```
 
@@ -168,7 +168,7 @@ alembic upgrade head
 
 Backend:
 ```bash
-cd apps/seed-planter-api
+cd apps/agenticCompany
 pip install -r requirements.txt
 ```
 
@@ -182,7 +182,7 @@ npm install
 
 Backend:
 ```bash
-cd apps/seed-planter-api
+cd apps/agenticCompany
 python src/main.py
 ```
 
@@ -312,7 +312,7 @@ Access conversion metrics via `/api/v1/billing/metrics`:
 
 Run pytest suite:
 ```bash
-cd apps/seed-planter-api
+cd apps/agenticCompany
 pytest tests/
 ```
 
@@ -374,7 +374,7 @@ Regularly verify:
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/roeiba/SeedGPT/issues
+- GitHub Issues: https://github.com/springsoftware-io/agenticCompany/issues
 - Email: support@seedgpt.com
 
 ## License
