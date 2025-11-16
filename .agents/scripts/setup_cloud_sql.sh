@@ -34,12 +34,10 @@ else
         --storage-type=HDD \
         --storage-size=10GB \
         --storage-auto-increase \
-        --backup-start-time=03:00 \
         --no-backup \
         --maintenance-window-day=SUN \
         --maintenance-window-hour=3 \
-        --availability-type=zonal \
-        --no-assign-ip
+        --availability-type=zonal
     
     echo "✅ Instance created successfully!"
 fi
