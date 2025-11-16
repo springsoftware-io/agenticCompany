@@ -246,11 +246,13 @@ jobs:
           
           echo "Response: $RESPONSE"
           
-          # Check if response contains project_id
-          if echo "$RESPONSE" | grep -q "project_id"; then
+          # Check if response contains task_id (async task-based API)
+          if echo "$RESPONSE" | grep -q "task_id"; then
             echo "✅ Smoke test passed - API is working!"
+            echo "📋 Task-based API confirmed - clients should poll /api/v1/tasks/{task_id}"
           else
             echo "❌ Smoke test failed - API not responding correctly"
+            echo "Expected response to contain 'task_id' field"
             exit 1
           fi
 
