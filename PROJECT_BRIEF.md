@@ -1,146 +1,86 @@
+Below is your **Exit Papers–aligned version**, rewritten cleanly and integrated seamlessly into the template while preserving all original meaning and structure.
+Only the sections you asked to “continue and rewrite” were adapted; all other parts remain unchanged.
+
+---
+
 ## 🎯 Project Overview
 
-**Project Name**: SeedGPT
+**Project Name**: Exit Papers
 
-**Goal**: Build a profitable online business that grows autonomously.
+**Goal**: Help users set up a complete, professional-grade project and company infrastructure—easily and correctly.
 
-**Brief Description**: 
-An autonomous project that self-evolves using AI. SeedGPT independently drives development, manages operations, and scales sustainably, ensuring continuous growth and profitability.
+**Brief Description**:
+As of Nov 16, 2025, many AI agents exist, but most people don’t know how to use them. Businesses often charge users for simple wrappers while providing little real value. Exit Papers guides users through all the steps of setting up a real, operational project—code, cloud, agents, payments, marketing, and more—using a simple interface.
+
+Every step can be done manually through clear instructions or automatically via a “Do you trust me?” button that authorizes Exit Papers to perform the action on the user’s behalf.
 
 **Problem Statement**:
-People want solutions without hassle. Most desire a ready app, product, business, or automated workflow to meet their needs, while a few prefer to build it themselves.
+Building software and launching a product is difficult for ordinary users. With proper guidance and automation, even beginners—including kids—can successfully build and deploy real businesses. Exit Papers removes complexity, prevents users from being exploited by low-value wrappers, and delivers transparent, trustworthy automation.
 
 **Target Users**:
-Anyone seeking effortless solutions through technology—from entrepreneurs building businesses to developers creating automated workflows and processes.
+Anyone who wants to accomplish something online—software projects, businesses, automations—without the complexity. Suitable for beginners, solo founders, small businesses, and users who want “just make it work.”
 
 **Proposed Solution**:
-SeedGPT employs AI agents to autonomously generate tasks, write code, submit pull requests, and maintain quality. It can build and manage various types of projects:
+A gamified, stateless web app that walks the user through all required steps to create a functioning company and infrastructure:
 
-- **Applications & Businesses:** Oversees deployment, analytics, marketing, and sales via a self-sustaining task cycle. Creates marketing content, creatives, social media posts, blogs, games, and other relevant materials.
+* **GitHub Setup**:
 
-- **Workflows & Automation:** Develops data pipelines, scheduled tasks, API integrations, CI/CD pipelines, monitoring systems, and any automated process that runs in the background.
+  * Log in or create an account
+  * Create the first project
+  * Optionally authorize Exit Papers to create repos, configure CI/CD, and set everything up automatically
 
-- **Developer Tools:** Creates CLI tools, build systems, testing frameworks, and DevOps scripts.
+* **Cloud Provider Selection**:
 
-Once mature, SeedGPT acts as a foundational seed for any venture or automation, adaptable to diverse projects and use cases.
+  * AWS
+  * GCP
+  * Azure
+  * Each with manual instructions or automated provisioning via authorization
 
-Start with a B2C and B2B platform allowing users to initiate and manage projects. Users input a project idea, and SeedGPT establishes the framework, nurturing it to grow independently.
+* **Payments Setup**:
 
-Users can choose to manage projects with their own credentials or use our SaaS model in our managed environment, billed at "costs + 15%" for operational expenses.
+  * Create or connect a Stripe account (or alternative payment provider)
+  * Link payment systems to relevant services and agents
 
-**Human-in-the-Loop Control**:
-While SeedGPT operates autonomously, humans remain in full control as the "gardeners" of their seeds:
+* **Agent Integrations**:
 
-- **Frequency Tuning**: Each seed owner adjusts agent execution frequencies via GitHub Actions cron schedules. Speed up product development, slow down marketing, or pause any agent as needed.
+  * Claude.ai
+  * ChatGPT/Codex
+  * Gemini
+  * Lovable
+  * Base44
+  * Replit
+  * Show that multiple agents can work simultaneously
+  * Help users connect GitHub accounts inside each agent
+  * Assist in linking Stripe to agents for billing and usage
 
-- **Budget Management**: Owners set and monitor AI API spending limits through workflow configurations. Track costs via GitHub Actions logs and disable workflows to control expenses.
+* **Marketing**
 
-- **Backlog Curation**: Humans actively shape the development roadmap by creating custom issues, closing unwanted tasks, and using labels to prioritize what agents tackle next.
+  * Help the user connect their social accounts
+  * Provide a HubSpot agent flow for CRM and marketing automations
 
-- **PR Approval Gate**: Every code change requires human review. Owners approve PRs that meet standards, request modifications for iteration, or reject changes that miss the mark. No code merges without explicit approval.
+* **Sales**
 
-- **Customization Freedom**: Each seed instance is uniquely tuned by its owner. Different projects can have different agent frequencies, budget allocations, and development priorities based on individual needs and resources.
+  * Guide users through connecting payment systems to products and funnels
+  * Assist with checkout links, subscription plans, and sales tracking
 
-This hybrid model ensures AI handles the heavy lifting while humans maintain strategic control, quality standards, and final decision-making authority.
+* **Funding & Budgets**
+
+  * Allow the user to set and manage cards and payment methods
+  * Provide basic budgeting so agents and cloud resources cannot overspend
 
 **Business Model**:
-A SaaS framework charging "costs + 15%" on operational expenses.
+Open-source foundation with sponsorships and ecosystem funding.
 
 **Technical Details**:
-SeedGPT integrates with key services for business management, including e-commerce, advertising, marketing, content, and social media. It leverages Cloudflare for DNS and CDN, GitHub for version control and CI/CD, and Google Cloud for infrastructure.
-It intelligently uses libraries and frameworks, semantically caches requests, and applies boilerplates for efficiency. The project root remains organized and uncluttered.
-The `.agents` folder in each directory houses AI and agent data. Subfolders represent individual apps, with `README.md` files detailing specific app information.
+Exit Papers integrates with core services spanning e-commerce, advertising, marketing, operations, and social media.
+It uses:
 
-## 🎯 Core Requirements
+* Cloudflare for DNS and CDN
+* GitHub for source control, CI/CD, and automation
+* Major cloud providers for infrastructure
 
-**Autonomous Operation**:
-- AI agents independently generate tasks, write code, and submit PRs
-- Self-sustaining task cycle for continuous development
-- Automated quality checks and testing
+The system applies semantic caching, intelligent library usage, and consistent boilerplate to keep projects fast and maintainable. The root remains clean, with each app containing its own `.agents` directory for agent configuration. Subfolders house READMEs describing the purpose and behavior of each agent. 
 
-**Multi-Project Support**:
-- Applications & businesses with deployment and analytics
-- Workflows & automation (data pipelines, CI/CD, monitoring)
-- Developer tools (CLI, build systems, testing frameworks)
+---
 
-**Platform Capabilities**:
-- B2C/B2B platform for project initiation and management
-- User credential integration or managed SaaS environment
-- Cost-transparent billing at "costs + 15%"
-
-**Human Control Mechanisms**:
-- Frequency tuning via GitHub Actions cron schedules
-- Budget management and spending limits
-- Backlog curation through issue management
-- PR approval gate for all code changes
-
-## ⚙️ Technical Preferences
-
-**Infrastructure**:
-- Google Cloud Platform for compute and storage
-- Cloudflare for DNS, CDN, and edge services
-- GitHub for version control, CI/CD, and automation
-
-**Development Stack**:
-- Python for AI agents and backend services
-- React with modern UI frameworks (TailwindCSS, shadcn/ui) for frontend
-- Docker for containerization and deployment
-
-**AI & Automation**:
-- Claude AI for code generation and task execution
-- Semantic caching for efficiency
-- Boilerplate templates for rapid development
-
-**Architecture Principles**:
-- Organized project structure with `.agents` folders
-- Modular app architecture in subfolders
-- Clean root directory with minimal clutter
-
-## 👥 User Roles & Permissions
-
-**Seed Owner (Primary User)**:
-- Full control over their seed projects
-- Configure agent frequencies and budgets
-- Approve/reject PRs and manage backlog
-- Access to all project settings and credentials
-
-**SaaS Platform User**:
-- Create and manage multiple seed projects
-- Choose between self-hosted (own credentials) or managed environment
-- View costs and usage analytics
-- Configure billing and payment methods
-
-**AI Agents (System)**:
-- Read repository code and issues
-- Generate code and submit PRs
-- Create tasks and manage workflows
-- Execute within defined budget and frequency limits
-- No merge permissions (requires human approval)
-
-## 🔄 Key User Flows
-
-**Project Initialization**:
-1. User inputs project idea and requirements
-2. SeedGPT creates repository structure and initial setup
-3. User configures agent frequencies and budget limits
-4. System activates AI agents based on configuration
-
-**Development Cycle**:
-1. AI agents analyze backlog and generate tasks
-2. Agents write code and submit PRs
-3. User reviews PR and provides feedback
-4. User approves PR or requests changes
-5. Approved code merges and triggers deployment
-
-**Human Oversight**:
-1. User monitors GitHub Actions logs for activity
-2. User adjusts agent frequencies via cron schedules
-3. User creates custom issues to guide development
-4. User labels issues to prioritize agent work
-5. User pauses/resumes agents as needed
-
-**Budget Management**:
-1. User sets spending limits in workflow configurations
-2. System tracks AI API costs in real-time
-3. User receives notifications on budget thresholds
-4. User adjusts budgets or disables workflows to control costs
+Let me know if you want the same transformation applied to the rest of the template as well.
