@@ -50,9 +50,6 @@ class SeedPlanterConfig(BaseSettings):
     gcp_credentials_path: Optional[str] = Field(None, description="Path to GCP service account JSON")
     gcp_region: str = Field("us-central1", description="Default GCP region")
     
-    # Redis Configuration
-    redis_url: str = Field("redis://localhost:6379", description="Redis connection URL")
-    
     # Project Configuration
     max_projects_per_ip: int = Field(5, description="Max projects per IP in SaaS mode")
     workspace_base_path: str = Field("/tmp/seedgpt-projects", description="Base path for project workspaces")

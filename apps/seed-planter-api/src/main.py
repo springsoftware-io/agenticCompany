@@ -81,16 +81,13 @@ async def lifespan(app: FastAPI):
     init_db()
     logger.info("✅ Database initialized")
     
-    # Connect to Redis (optional - will work without it)
-    logger.info("🔴 Connecting to Redis...")
+    # Initialize task storage (using database)
+    logger.info("📦 Initializing task storage...")
     try:
         await task_storage.connect()
-        if task_storage.redis_client:
-            logger.info("✅ Redis connected - task polling enabled")
-        else:
-            logger.warning("⚠️ Redis not available - task polling disabled")
+        logger.info("✅ Task storage initialized")
     except Exception as e:
-        logger.warning(f"⚠️ Redis connection failed: {e} - task polling disabled")
+        logger.warning(f"⚠️ Task storage initialization failed: {e}")
 
     yield
     # Shutdown
@@ -98,7 +95,7 @@ async def lifespan(app: FastAPI):
     try:
         await task_storage.disconnect()
     except Exception as e:
-        logger.warning(f"Error disconnecting from Redis: {e}")
+        logger.warning(f"Error during task storage cleanup: {e}")
 
 
 app = FastAPI(
@@ -246,7 +243,7 @@ async def plant_seed(
             api_calls=1
         )
         
-        # Create task in Redis
+        # Create task in database
         await task_storage.create_task(task_id, {
             "project_name": request.project_name,
             "project_description": request.project_description,
@@ -256,7 +253,7 @@ async def plant_seed(
             "progress_percent": 0
         })
 
-        # Create progress callback that updates Redis
+        # Create progress callback that updates database
         async def progress_callback(progress: ProjectProgress):
             await task_storage.update_progress(task_id, progress)
 
@@ -306,7 +303,7 @@ async def get_task_status(task_id: str):
     
     logger.debug(f"📊 Task status request for: {task_id}")
     
-    # Get task data from Redis
+    # Get task data from database
     task_data = await task_storage.get_task(task_id)
     
     if not task_data:
