@@ -81,15 +81,24 @@ async def lifespan(app: FastAPI):
     init_db()
     logger.info("✅ Database initialized")
     
-    # Connect to Redis
+    # Connect to Redis (optional - will work without it)
     logger.info("🔴 Connecting to Redis...")
-    await task_storage.connect()
-    logger.info("✅ Redis connected")
+    try:
+        await task_storage.connect()
+        if task_storage.redis_client:
+            logger.info("✅ Redis connected - task polling enabled")
+        else:
+            logger.warning("⚠️ Redis not available - task polling disabled")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis connection failed: {e} - task polling disabled")
 
     yield
     # Shutdown
     logger.info("👋 Seed Planter API shutting down...")
-    await task_storage.disconnect()
+    try:
+        await task_storage.disconnect()
+    except Exception as e:
+        logger.warning(f"Error disconnecting from Redis: {e}")
 
 
 app = FastAPI(

@@ -22,12 +22,17 @@ class TaskStorage:
     async def connect(self):
         """Connect to Redis"""
         if not self.redis_client:
-            self.redis_client = await redis.from_url(
-                config.redis_url,
-                encoding="utf-8",
-                decode_responses=True
-            )
-            logger.info(f"Connected to Redis at {config.redis_url}")
+            try:
+                self.redis_client = await redis.from_url(
+                    config.redis_url,
+                    encoding="utf-8",
+                    decode_responses=True,
+                    socket_connect_timeout=5
+                )
+                logger.info(f"Connected to Redis at {config.redis_url}")
+            except Exception as e:
+                logger.warning(f"Failed to connect to Redis: {e}. Task storage will be disabled.")
+                self.redis_client = None
     
     async def disconnect(self):
         """Disconnect from Redis"""
@@ -46,6 +51,10 @@ class TaskStorage:
     async def create_task(self, task_id: str, initial_data: Dict[str, Any]) -> None:
         """Create a new task"""
         await self.connect()
+        
+        if not self.redis_client:
+            logger.warning(f"Redis not available, skipping task creation for {task_id}")
+            return
         
         task_data = {
             "task_id": task_id,
@@ -70,6 +79,9 @@ class TaskStorage:
     ) -> None:
         """Update task status and additional fields"""
         await self.connect()
+        
+        if not self.redis_client:
+            return
         
         task_key = self._task_key(task_id)
         task_data_str = await self.redis_client.get(task_key)
@@ -102,6 +114,9 @@ class TaskStorage:
         """Update task progress"""
         await self.connect()
         
+        if not self.redis_client:
+            return
+        
         progress_data = {
             "task_id": task_id,
             "status": progress.status.value,
@@ -133,6 +148,9 @@ class TaskStorage:
         """Get task data"""
         await self.connect()
         
+        if not self.redis_client:
+            return None
+        
         task_data_str = await self.redis_client.get(self._task_key(task_id))
         
         if not task_data_str:
@@ -143,6 +161,9 @@ class TaskStorage:
     async def get_progress(self, task_id: str) -> Optional[Dict[str, Any]]:
         """Get latest progress for a task"""
         await self.connect()
+        
+        if not self.redis_client:
+            return None
         
         progress_data_str = await self.redis_client.get(self._progress_key(task_id))
         
@@ -158,6 +179,10 @@ class TaskStorage:
     ) -> None:
         """Mark task as completed with result"""
         await self.connect()
+        
+        if not self.redis_client:
+            logger.info(f"Task {task_id} completed (Redis not available)")
+            return
         
         await self.update_task_status(
             task_id,
@@ -180,6 +205,10 @@ class TaskStorage:
     ) -> None:
         """Mark task as failed"""
         await self.connect()
+        
+        if not self.redis_client:
+            logger.error(f"Task {task_id} failed: {error_message} (Redis not available)")
+            return
         
         await self.update_task_status(
             task_id,
