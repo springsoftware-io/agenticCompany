@@ -41,30 +41,30 @@ class TestProjectsAPI:
         data = response.json()
         
         required_fields = [
-            "project_id",
+            "task_id",
             "status",
             "created_at",
-            "websocket_url",
-            "estimated_completion_time"
+            "estimated_completion_time",
+            "message"
         ]
         
         for field in required_fields:
             assert field in data, f"Missing required field: {field}"
 
-    def test_create_project_id_is_uuid(
+    def test_create_project_task_id_is_uuid(
         self, 
         api_client: httpx.Client, 
         sample_project_request: Dict
     ):
-        """Test that project_id is a valid UUID"""
+        """Test that task_id is a valid UUID"""
         response = api_client.post("/api/v1/projects", json=sample_project_request)
         data = response.json()
-        project_id = data["project_id"]
+        task_id = data["task_id"]
         
         # UUID format: 8-4-4-4-12 hex characters
         import re
         uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-        assert re.match(uuid_pattern, project_id), f"Invalid UUID format: {project_id}"
+        assert re.match(uuid_pattern, task_id), f"Invalid UUID format: {task_id}"
 
     def test_create_project_status_is_initializing(
         self, 
@@ -76,20 +76,19 @@ class TestProjectsAPI:
         data = response.json()
         assert data["status"] == "initializing"
 
-    def test_create_project_websocket_url_format(
+    def test_create_project_message_exists(
         self, 
         api_client: httpx.Client, 
         sample_project_request: Dict
     ):
-        """Test that WebSocket URL is properly formatted"""
+        """Test that response includes a status message"""
         response = api_client.post("/api/v1/projects", json=sample_project_request)
         data = response.json()
-        ws_url = data["websocket_url"]
+        message = data["message"]
         
-        assert ws_url.startswith("ws://") or ws_url.startswith("wss://")
-        assert "/api/v1/projects/" in ws_url
-        assert "/ws" in ws_url
-        assert data["project_id"] in ws_url
+        assert isinstance(message, str)
+        assert len(message) > 0
+        assert "task_id" in message.lower() or "started" in message.lower()
 
     def test_create_project_estimated_time_is_positive(
         self, 
@@ -158,7 +157,7 @@ class TestProjectsAPI:
         response = api_client.post("/api/v1/projects", json=sample_project_request_minimal)
         assert response.status_code == 200
         data = response.json()
-        assert "project_id" in data
+        assert "task_id" in data
 
     def test_create_project_response_time(
         self, 
@@ -179,17 +178,17 @@ class TestProjectsAPI:
         api_client: httpx.Client, 
         sample_project_request: Dict
     ):
-        """Test that multiple projects get unique IDs"""
+        """Test that multiple projects get unique task IDs"""
         response1 = api_client.post("/api/v1/projects", json=sample_project_request)
         response2 = api_client.post("/api/v1/projects", json=sample_project_request)
         
         assert response1.status_code == 200
         assert response2.status_code == 200
         
-        id1 = response1.json()["project_id"]
-        id2 = response2.json()["project_id"]
+        id1 = response1.json()["task_id"]
+        id2 = response2.json()["task_id"]
         
-        assert id1 != id2, "Project IDs should be unique"
+        assert id1 != id2, "Task IDs should be unique"
 
     def test_list_projects_endpoint_exists(self, api_client: httpx.Client):
         """Test that list projects endpoint exists"""
