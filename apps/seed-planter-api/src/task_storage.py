@@ -45,7 +45,7 @@ class TaskStorage:
                 progress_percent=initial_data.get("progress_percent", 0),
                 created_at=datetime.utcnow(),
                 expires_at=datetime.utcnow() + timedelta(seconds=self.task_ttl),
-                metadata=initial_data.get("metadata")
+                extra_data=initial_data.get("extra_data")
             )
             db.add(task)
             db.commit()
@@ -157,7 +157,7 @@ class TaskStorage:
                 "updated_at": task.updated_at.isoformat() if task.updated_at else None,
                 "completed_at": task.completed_at.isoformat() if task.completed_at else None,
                 "failed_at": task.failed_at.isoformat() if task.failed_at else None,
-                "metadata": task.metadata
+                "extra_data": task.extra_data
             }
         finally:
             db.close()
@@ -184,7 +184,7 @@ class TaskStorage:
                 "deployment_url": progress.deployment_url,
                 "gcp_project_id": progress.gcp_project_id,
                 "timestamp": progress.timestamp.isoformat() if progress.timestamp else None,
-                "metadata": progress.metadata
+                "extra_data": progress.extra_data
             }
         finally:
             db.close()

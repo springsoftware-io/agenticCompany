@@ -16,14 +16,15 @@ class ClaudeModels:
 
     # Primary models
     SONNET_3_5 = "claude-3-5-sonnet-20241022"
+    SONNET_3_7 = "claude-3-7-sonnet-20250219"
     SONNET_4_5 = "claude-sonnet-4-5"
 
     # Default model for different use cases
-    DEFAULT = SONNET_3_5
-    ISSUE_GENERATION = SONNET_3_5
-    QA_ANALYSIS = SONNET_3_5
-    ISSUE_RESOLUTION = SONNET_3_5
-    WORKFLOW = SONNET_3_5
+    DEFAULT = SONNET_3_7
+    ISSUE_GENERATION = SONNET_3_7
+    QA_ANALYSIS = SONNET_3_7
+    ISSUE_RESOLUTION = SONNET_3_7
+    WORKFLOW = SONNET_3_7
 
     # Model parameters
     DEFAULT_MAX_TOKENS = 2000
