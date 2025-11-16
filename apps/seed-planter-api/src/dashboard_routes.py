@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
 from database import get_db
-from db_models import User, UsageMetric, Subscription
+from db_models import User, UsageMetric, Subscription, Task, TaskProgress
 from auth import get_current_active_user
 from pydantic import BaseModel, Field
 
@@ -100,6 +100,28 @@ class TimeSeriesResponse(BaseModel):
     data_points: List[TimeSeriesDataPoint]
     unit: str = ""
     period: str = "daily"  # hourly, daily, weekly
+
+
+class ActiveTaskRecord(BaseModel):
+    """Active project creation task"""
+    task_id: str
+    project_name: str
+    status: str
+    message: str
+    progress_percent: int = Field(ge=0, le=100)
+    created_at: str
+    updated_at: Optional[str] = None
+    org_url: Optional[str] = None
+    repo_url: Optional[str] = None
+    deployment_url: Optional[str] = None
+
+
+class ActiveTasksResponse(BaseModel):
+    """List of active project creation tasks"""
+    active_tasks: List[ActiveTaskRecord]
+    total_active: int
+    total_completed_today: int
+    total_failed_today: int
 
 
 # ==================== Helper Functions ====================
@@ -278,17 +300,31 @@ async def get_dashboard_metrics(
         today = datetime.utcnow().date()
         week_start = today - timedelta(days=today.weekday())
 
+        # Get real task data from database
+        db_tasks_today = db.query(func.count(Task.id)).filter(
+            Task.user_email == current_user.email,
+            Task.status == "completed",
+            func.date(Task.completed_at) == today
+        ).scalar() or 0
+
+        db_tasks_week = db.query(func.count(Task.id)).filter(
+            Task.user_email == current_user.email,
+            Task.status == "completed",
+            func.date(Task.completed_at) >= week_start
+        ).scalar() or 0
+
+        # Combine with outcome tracker data
         tasks_today = sum(
             1 for outcome in recent_outcomes
             if outcome.get("merged_at") and
             datetime.fromisoformat(outcome["merged_at"]).date() == today
-        )
+        ) + db_tasks_today
 
         tasks_this_week = sum(
             1 for outcome in recent_outcomes
             if outcome.get("merged_at") and
             datetime.fromisoformat(outcome["merged_at"]).date() >= week_start
-        )
+        ) + db_tasks_week
 
         prs_today = sum(
             1 for outcome in recent_outcomes
@@ -497,6 +533,70 @@ async def get_timeseries_metrics(
         unit="count" if "count" in metric_name or "tasks" in metric_name else "percent",
         period=period
     )
+
+
+@router.get("/active-tasks", response_model=ActiveTasksResponse)
+async def get_active_tasks(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all active project creation tasks for the current user
+
+    Shows real-time progress of ongoing project plantings
+    """
+    logger.info(f"📋 Active tasks request from: {current_user.email}")
+
+    try:
+        # Get active tasks (not completed or failed)
+        active_tasks = db.query(Task).filter(
+            Task.user_email == current_user.email,
+            Task.status.in_(["initializing", "in_progress", "creating_org", "forking_repo", "customizing", "deploying"])
+        ).order_by(Task.created_at.desc()).all()
+
+        # Get today's completed and failed tasks
+        today = datetime.utcnow().date()
+        completed_today = db.query(func.count(Task.id)).filter(
+            Task.user_email == current_user.email,
+            Task.status == "completed",
+            func.date(Task.completed_at) == today
+        ).scalar() or 0
+
+        failed_today = db.query(func.count(Task.id)).filter(
+            Task.user_email == current_user.email,
+            Task.status == "failed",
+            func.date(Task.failed_at) == today
+        ).scalar() or 0
+
+        # Build response
+        task_records = []
+        for task in active_tasks:
+            task_records.append(ActiveTaskRecord(
+                task_id=task.task_id,
+                project_name=task.project_name or "Unknown",
+                status=task.status,
+                message=task.message or "Processing...",
+                progress_percent=task.progress_percent or 0,
+                created_at=task.created_at.isoformat() if task.created_at else datetime.utcnow().isoformat(),
+                updated_at=task.updated_at.isoformat() if task.updated_at else None,
+                org_url=task.org_url,
+                repo_url=task.repo_url,
+                deployment_url=task.deployment_url
+            ))
+
+        response = ActiveTasksResponse(
+            active_tasks=task_records,
+            total_active=len(task_records),
+            total_completed_today=completed_today,
+            total_failed_today=failed_today
+        )
+
+        logger.info(f"✅ Found {len(task_records)} active tasks for {current_user.email}")
+        return response
+
+    except Exception as e:
+        logger.error(f"❌ Error fetching active tasks: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch active tasks: {str(e)}")
 
 
 @router.get("/health")

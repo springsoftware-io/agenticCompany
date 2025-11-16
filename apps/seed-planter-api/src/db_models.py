@@ -185,3 +185,69 @@ class PricingConfig(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Task(Base):
+    """Track async task execution (replaces Redis)."""
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, nullable=False)  # initializing, in_progress, completed, failed
+    
+    # Task data
+    project_name = Column(String, nullable=True)
+    project_description = Column(String, nullable=True)
+    user_email = Column(String, nullable=True)
+    mode = Column(String, nullable=True)
+    
+    # Progress tracking
+    message = Column(String, nullable=True)
+    progress_percent = Column(Integer, default=0)
+    
+    # Result data (when completed)
+    project_id = Column(String, nullable=True)
+    org_url = Column(String, nullable=True)
+    repo_url = Column(String, nullable=True)
+    deployment_url = Column(String, nullable=True)
+    gcp_project_id = Column(String, nullable=True)
+    
+    # Error tracking
+    error_message = Column(String, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    failed_at = Column(DateTime, nullable=True)
+    
+    # Expiration (tasks auto-delete after 1 hour)
+    expires_at = Column(DateTime, nullable=False)
+    
+    # Additional metadata
+    metadata = Column(JSON, nullable=True)
+
+
+class TaskProgress(Base):
+    """Track detailed progress updates for tasks."""
+    __tablename__ = "task_progress"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(String, ForeignKey("tasks.task_id"), nullable=False, index=True)
+    
+    # Progress details
+    status = Column(String, nullable=False)
+    message = Column(String, nullable=False)
+    progress_percent = Column(Integer, default=0)
+    
+    # URLs (as they become available)
+    org_url = Column(String, nullable=True)
+    repo_url = Column(String, nullable=True)
+    deployment_url = Column(String, nullable=True)
+    gcp_project_id = Column(String, nullable=True)
+    
+    # Timestamp
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Metadata
+    metadata = Column(JSON, nullable=True)

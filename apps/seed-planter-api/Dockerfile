@@ -39,9 +39,8 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 ENV PORT=8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8080/')" || exit 1
+# Note: Cloud Run has its own health checks, so we don't need HEALTHCHECK
+# Removed HEALTHCHECK to speed up container startup
 
 # Run the application
 CMD ["python", "src/main.py"]

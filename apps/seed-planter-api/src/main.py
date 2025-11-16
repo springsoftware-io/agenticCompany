@@ -77,20 +77,31 @@ async def lifespan(app: FastAPI):
     logger.info(f"   Mode: {config.api_debug and 'DEBUG' or 'PRODUCTION'}")
     logger.info(f"   Host: {config.api_host}:{config.api_port}")
 
-    # Initialize database
+    # Initialize database with retry logic
     logger.info("📊 Initializing database...")
-    init_db()
-    logger.info("✅ Database initialized")
+    try:
+        init_db(max_retries=5, retry_delay=2)
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.error(f"❌ Database initialization failed: {e}")
+        logger.warning("⚠️ App will start but database operations may fail")
     
-    # Connect to Redis
-    logger.info("🔴 Connecting to Redis...")
-    await task_storage.connect()
-    logger.info("✅ Redis connected")
+    # Initialize task storage (using database)
+    logger.info("📦 Initializing task storage...")
+    try:
+        await task_storage.connect()
+        logger.info("✅ Task storage initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Task storage initialization failed: {e}")
+        logger.warning("⚠️ Task operations may fail until database is available")
 
     yield
     # Shutdown
     logger.info("👋 Seed Planter API shutting down...")
-    await task_storage.disconnect()
+    try:
+        await task_storage.disconnect()
+    except Exception as e:
+        logger.warning(f"Error during task storage cleanup: {e}")
 
 
 app = FastAPI(
@@ -239,7 +250,7 @@ async def plant_seed(
             api_calls=1
         )
         
-        # Create task in Redis
+        # Create task in database
         await task_storage.create_task(task_id, {
             "project_name": request.project_name,
             "project_description": request.project_description,
@@ -249,7 +260,7 @@ async def plant_seed(
             "progress_percent": 0
         })
 
-        # Create progress callback that updates Redis
+        # Create progress callback that updates database
         async def progress_callback(progress: ProjectProgress):
             await task_storage.update_progress(task_id, progress)
 
@@ -299,7 +310,7 @@ async def get_task_status(task_id: str):
     
     logger.debug(f"📊 Task status request for: {task_id}")
     
-    # Get task data from Redis
+    # Get task data from database
     task_data = await task_storage.get_task(task_id)
     
     if not task_data:
