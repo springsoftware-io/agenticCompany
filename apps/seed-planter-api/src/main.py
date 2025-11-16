@@ -76,10 +76,14 @@ async def lifespan(app: FastAPI):
     logger.info(f"   Mode: {config.api_debug and 'DEBUG' or 'PRODUCTION'}")
     logger.info(f"   Host: {config.api_host}:{config.api_port}")
 
-    # Initialize database
+    # Initialize database with retry logic
     logger.info("📊 Initializing database...")
-    init_db()
-    logger.info("✅ Database initialized")
+    try:
+        init_db(max_retries=5, retry_delay=2)
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.error(f"❌ Database initialization failed: {e}")
+        logger.warning("⚠️ App will start but database operations may fail")
     
     # Initialize task storage (using database)
     logger.info("📦 Initializing task storage...")
@@ -88,6 +92,7 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Task storage initialized")
     except Exception as e:
         logger.warning(f"⚠️ Task storage initialization failed: {e}")
+        logger.warning("⚠️ Task operations may fail until database is available")
 
     yield
     # Shutdown
