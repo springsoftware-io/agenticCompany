@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Sparkles, Github, GitPullRequest, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Sparkles, Github, GitPullRequest, FileText, CheckCircle, XCircle, Loader2, Activity, BarChart3 } from 'lucide-react'
 import { useSeedPlanter } from './hooks/useSeedPlanter'
+import Dashboard from './components/Dashboard'
 
 function App() {
+  const [currentView, setCurrentView] = useState('home') // 'home' or 'dashboard'
   const [projectIdea, setProjectIdea] = useState('')
   const { plantProject, progress, error, isPlanting } = useSeedPlanter()
 
@@ -25,17 +27,71 @@ function App() {
     }
   }
 
+  // Check if user is authenticated (has token)
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('auth_token')
+  }
+
+  // Render dashboard if view is dashboard and user is authenticated
+  if (currentView === 'dashboard') {
+    if (!isAuthenticated()) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 flex items-center justify-center">
+          <div className="card max-w-md text-center">
+            <Activity className="w-12 h-12 text-primary-600 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+            <p className="text-gray-600 mb-4">Please log in to view your project dashboard.</p>
+            <button onClick={() => setCurrentView('home')} className="btn-primary">
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return <Dashboard />
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-primary-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">SeedGPT Sandbox</h1>
-              <p className="text-sm text-gray-600">Watch AI build your project in real-time</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-primary-600" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">SeedGPT Sandbox</h1>
+                <p className="text-sm text-gray-600">Watch AI build your project in real-time</p>
+              </div>
             </div>
+
+            {/* Navigation */}
+            {isAuthenticated() && (
+              <nav className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentView('home')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                    currentView === 'home'
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Home
+                </button>
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                    currentView === 'dashboard'
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Dashboard
+                </button>
+              </nav>
+            )}
           </div>
         </div>
       </header>

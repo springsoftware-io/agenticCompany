@@ -20,6 +20,7 @@ from usage_metering import UsageMeteringService
 # Import routers
 from auth_routes import router as auth_router
 from billing_routes import router as billing_router
+from dashboard_routes import router as dashboard_router
 
 # Configure logging
 logging.basicConfig(
@@ -117,6 +118,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(billing_router)
+app.include_router(dashboard_router)
 
 
 @app.get("/")
