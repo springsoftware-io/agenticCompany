@@ -24,6 +24,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # OAuth fields
+    oauth_provider = Column(String, nullable=True)  # 'auth0', 'github', etc.
+    oauth_id = Column(String, unique=True, nullable=True, index=True)  # OAuth provider's user ID
 
     # Relationships
     subscription = relationship("Subscription", back_populates="user", uselist=False)

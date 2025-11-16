@@ -81,6 +81,12 @@ class SeedPlanterConfig(BaseSettings):
         description="Access token expiration in minutes"
     )
 
+    # Auth0 Configuration
+    auth0_domain: str = Field("", description="Auth0 domain")
+    auth0_client_id: str = Field("", description="Auth0 client ID")
+    auth0_client_secret: str = Field("", description="Auth0 client secret")
+    auth0_audience: str = Field("", description="Auth0 API audience")
+
     # Stripe Configuration
     stripe_secret_key: str = Field("", description="Stripe secret key")
     stripe_publishable_key: str = Field("", description="Stripe publishable key")

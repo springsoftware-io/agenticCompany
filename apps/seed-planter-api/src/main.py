@@ -4,7 +4,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, Optional
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,10 +15,12 @@ from config import config
 from database import get_db, init_db
 from db_models import User
 from auth import get_current_active_user
+from auth0_service import get_optional_user_auth0
 from usage_metering import UsageMeteringService
 
 # Import routers
 from auth_routes import router as auth_router
+from auth0_routes import router as auth0_router
 from billing_routes import router as billing_router
 from dashboard_routes import router as dashboard_router
 
@@ -122,6 +124,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(auth0_router)
 app.include_router(billing_router)
 app.include_router(dashboard_router)
 
@@ -214,47 +217,53 @@ async def exchange_oauth_code(request: OAuthExchangeRequest):
 async def plant_seed(
     request: PlantSeedRequest,
     req: Request,
-    current_user: User = Depends(get_current_active_user),
+    current_user: Optional[User] = Depends(get_optional_user_auth0),
     db: Session = Depends(get_db)
 ):
     """
-    Plant a new project seed (requires authentication)
+    Plant a new project seed (optional authentication)
 
     This endpoint initiates the planting of a permanent project that will grow
     autonomously. Creates GitHub org, forks SeedGPT template, customizes with AI,
     sets up GCP, and deploys.
 
     Returns a task_id that can be used to poll for progress.
-    Usage is metered and counts against your monthly quota.
+    For authenticated users, usage is metered and counts against your monthly quota.
     """
 
     logger.info(f"📥 Received plant seed request: {request.project_name}")
-    logger.info(f"   User: {current_user.email}")
+    if current_user:
+        logger.info(f"   User: {current_user.email}")
+    else:
+        logger.info(f"   User: Anonymous")
     logger.info(f"   Description: {request.project_description[:100]}...")
     logger.info(f"   Mode: {request.mode.value}")
 
     try:
-        # Check and enforce usage quota
-        metering_service = UsageMeteringService(db)
-        metering_service.enforce_quota(current_user, operation_count=1)
+        # Check and enforce usage quota for authenticated users
+        if current_user:
+            metering_service = UsageMeteringService(db)
+            metering_service.enforce_quota(current_user, operation_count=1)
 
         # Generate task ID
         import uuid
         task_id = str(uuid.uuid4())
 
-        # Increment usage counters
-        metering_service.increment_usage(
-            user=current_user,
-            ai_operations=1,
-            projects=1,
-            api_calls=1
-        )
+        # Increment usage counters for authenticated users
+        if current_user:
+            metering_service.increment_usage(
+                user=current_user,
+                ai_operations=1,
+                projects=1,
+                api_calls=1
+            )
         
         # Create task in database
+        user_email = request.user_email or (current_user.email if current_user else None)
         await task_storage.create_task(task_id, {
             "project_name": request.project_name,
             "project_description": request.project_description,
-            "user_email": request.user_email or current_user.email,
+            "user_email": user_email,
             "mode": request.mode.value,
             "message": "Initializing project creation...",
             "progress_percent": 0

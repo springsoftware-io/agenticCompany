@@ -92,6 +92,29 @@ async def get_current_active_user(
     return current_user
 
 
+async def get_optional_current_user(
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
+) -> Optional[User]:
+    """Get the current user if authenticated, otherwise return None."""
+    if credentials is None:
+        return None
+    
+    try:
+        token = credentials.credentials
+        payload = decode_access_token(token)
+        user_id: int = payload.get("sub")
+        if user_id is None:
+            return None
+        
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_active:
+            return user
+        return None
+    except:
+        return None
+
+
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """Authenticate a user by email and password."""
     user = db.query(User).filter(User.email == email).first()
